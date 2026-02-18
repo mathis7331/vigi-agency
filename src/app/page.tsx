@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect, Suspense } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Phone,
+
   MessageCircle,
   MapPin,
   Zap,
@@ -15,17 +18,22 @@ import {
   Truck,
   Car,
   FileText,
+  Droplets,
+  Check,
+  Sparkles,
 } from "lucide-react";
+
+import { Hero } from "@/components/sections/Hero";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-
 const navLinks = [
   { href: "#services", label: "Services" },
   { href: "#demo", label: "Démonstrations" },
   { href: "#methode", label: "Méthode" },
-  { href: "#avis", label: "Avis" },
+  { href: "#preuves", label: "Preuves" },
+  { href: "#offres", label: "Offres" },
   { href: "#contact", label: "Contact" },
 ];
 
@@ -68,36 +76,60 @@ const demos = [
     icon: Wrench,
     title: "Garage",
     tabLabel: "Garage",
-    bullets: ["Fiche atelier", "Services", "Horaires", "Contact rapide"],
+    bullets: [
+      "Fiche atelier claire pour rassurer dès l'arrivée",
+      "Services visibles immédiatement sur mobile",
+      "Bouton d'appel accessible en 1 tap",
+    ],
     previewTag: "GARAGE",
-    previewTitle: "Un garage visible quand on a besoin de vous.",
-    previewCopy: "Une page claire, bouton d'appel visible, services lisibles en une seconde.",
-    ctaLabel: "Voir ce type de site pour mon garage",
-    ctaDescription: "Une page type garage avec fiche atelier, services et bouton d'appel.",
+    previewTitle: "Pensé pour les garages qui veulent plus d'appels, pas plus de gestion.",
+    previewCopy: "Une page simple et efficace, comme votre façon de travailler.",
+    ctaLabel: "Voir la démo",
   },
   {
     id: "depannage",
     icon: Truck,
     title: "Dépannage urgence",
     tabLabel: "Dépannage urgence",
-    bullets: ["Page urgence 24/7", "Zone d’intervention", "Appel direct", "WhatsApp"],
+    bullets: [
+      "Page urgence accessible 24/7",
+      "Appel direct et WhatsApp visibles en permanence",
+      "Zone d'intervention claire pour éviter les appels inutiles",
+    ],
     previewTag: "DÉPANNAGE",
-    previewTitle: "Dépannage 24/7 qui rassure tout de suite.",
-    previewCopy: "Un numéro en évidence, la zone d'intervention claire, aucun doute pour appeler.",
-    ctaLabel: "Voir une page urgence",
-    ctaDescription: "Une page dédiée dépannage 24/7 avec appel direct et zone d'intervention.",
+    previewTitle: "Quand un client est en panne, il doit pouvoir vous appeler sans réfléchir.",
+    previewCopy: "Moins de questions, plus d'interventions.",
+    ctaLabel: "Voir la démo",
   },
   {
     id: "carrosserie",
     icon: Car,
     title: "Carrosserie / Pare-brise",
     tabLabel: "Carrosserie / Pare-brise",
-    bullets: ["Devis en ligne", "Photos avant/après", "Assurance", "Rendez-vous"],
+    bullets: [
+      "Avant / après pour montrer le travail réel",
+      "Demande de devis simple et rapide",
+      "Prise de rendez-vous sans échange inutile",
+    ],
     previewTag: "CARROSSERIE",
-    previewTitle: "Carrosserie propre, preuves visibles.",
-    previewCopy: "Avant / après, prise de rendez-vous simple, vos travaux parlent pour vous.",
-    ctaLabel: "Voir l'avant / après en action",
-    ctaDescription: "Un exemple de slider avant/après et prise de rendez-vous.",
+    previewTitle: "Ici, ce sont les résultats qui font la différence.",
+    previewCopy: "Le visuel rassure avant même le premier contact.",
+    ctaLabel: "Voir la démo",
+  },
+  {
+    id: "detailing",
+    icon: Droplets,
+    title: "Detailing / Lavage auto",
+    tabLabel: "Detailing / Lavage auto",
+    bullets: [
+      "Image premium orientée avant / après",
+      "Mise en valeur du détail et de la finition",
+      "Prise de rendez-vous fluide et rapide",
+    ],
+    previewTag: "DETAILING",
+    previewTitle: "Un métier visuel mérite une vitrine qui donne envie.",
+    previewCopy: "Une page pensée pour ceux qui veulent se démarquer.",
+    ctaLabel: "Ouvrir la démo",
   },
 ];
 
@@ -119,46 +151,101 @@ const processSteps = [
   },
 ];
 
-const heroContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      duration: 0.1,
-      staggerChildren: 0.12,
-      delayChildren: 0.1,
-    },
+const pricingPackages = [
+  {
+    id: "foundation",
+    name: "Foundation",
+    price: 150,
+    tagline: "Solution structurée pour une présence claire et efficace.",
+    sub: "Conçu pour générer des appels, sans superflu.",
+    features: [
+      "Site une page professionnel",
+      "Bouton d'appel 1 clic",
+      "Intégration WhatsApp",
+      "Section services claire",
+      "Adresse et horaires",
+      "Livraison rapide (72h)",
+      "Design mobile-first",
+      "Structure SEO de base",
+      "Formulaire de contact",
+    ],
+    highlighted: false,
   },
-} as const;
+  {
+    id: "performance",
+    name: "Performance",
+    price: 290,
+    tagline: "Structure complète, conversion au centre.",
+    sub: "L'offre la plus choisie pour une présence solide et des résultats mesurables.",
+    features: [
+      "Mise en page multi-sections ou multi-pages",
+      "Détail des services structuré",
+      "Parcours de contact optimisé conversion",
+      "Mise en page orientée conversion",
+      "UX mobile renforcée",
+      "Optimisation SEO locale de base",
+      "Intégration Google Maps",
+      "Ordre des sections stratégique",
+      "Structure orientée confiance",
+    ],
+    highlighted: true,
+    badge: "Le plus choisi",
+  },
+  {
+    id: "authority",
+    name: "Authority",
+    price: 450,
+    tagline: "Système complet, outil business.",
+    sub: "Tout le Performance, plus une vitrine à fort impact et une architecture pensée pour la conversion.",
+    features: [
+      "Tout inclus dans Performance",
+      "Page dédiée à fort impact (conversion)",
+      "Vitrine visuelle (système avant/après)",
+      "Optimisation conversion avancée",
+      "Intégration avis clients",
+      "Parcours d'appel structuré",
+      "Finition design soignée",
+      "Architecture de pages stratégique",
+      "UX affinée pour la performance",
+    ],
+    highlighted: false,
+  },
+];
 
-const heroItem = {
-  hidden: { opacity: 0, y: 16 },
+const monthlyAddOn = {
+  price: 9,
+  label: "Option sérénité",
+  tagline: "Hébergement, maintenance et suivi. Stabilité et tranquillité d'esprit.",
+  features: ["Hébergement", "Maintenance", "Mises à jour mineures", "Support technique", "Surveillance sécurité"],
+};
+
+const ZONE_VILLES_ALL: { id: string; label: string }[] = [
+  { id: "Bruxelles", label: "Bruxelles" },
+  { id: "Anvers", label: "Anvers" },
+  { id: "Gand", label: "Gand" },
+  { id: "Charleroi", label: "Charleroi" },
+  { id: "Liege", label: "Liège" },
+  { id: "Namur", label: "Namur" },
+  { id: "Louvain", label: "Louvain" },
+  { id: "Bruges", label: "Bruges" },
+  { id: "Mons", label: "Mons" },
+];
+
+
+
+/* Scroll reveal : inertie (monte et se stabilise) */
+const scrollRevealInertia = {
+  hidden: { opacity: 0, y: 32 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.5,
-      ease: [0.16, 1, 0.3, 1] as const,
-    },
-  },
-} as const;
-
-const heroMockup = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: [0.16, 1, 0.3, 1] as const,
-      delay: 0.2,
-    },
+    transition: { type: "spring", stiffness: 280, damping: 26 },
   },
 } as const;
 
 const contactSchema = z.object({
   name: z.string().min(2, "Prénom / Nom requis"),
-  business: z.string().min(1, "Nom de l’activité requis"),
+  business: z.string().min(1, "Nom de l'activité requis"),
   email: z.string().email("Email invalide"),
   city: z.string().min(2, "Ville / commune requise"),
   message: z.string().min(10, "Message trop court"),
@@ -166,130 +253,253 @@ const contactSchema = z.object({
 
 type ContactFormData = z.infer<typeof contactSchema>;
 
-/* Palette écran MacBook (ONLY inside screen, distincte du site principal) */
-const screenColors = {
-  bg: "#0B0D10",
-  surface: "rgba(255,255,255,0.06)",
-  cyan: "#20E3FF",
-  lime: "#B7FF3C",
-  text: "#E8ECF2",
-  textMuted: "rgba(232,236,242,0.65)",
-} as const;
-
-function BeforeAfterMini() {
-  const [position, setPosition] = useState(50);
-  const handleMouseDown = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.parentElement?.getBoundingClientRect();
-    if (!rect) return;
-    const move = (moveEvent: MouseEvent) => {
-      const x = moveEvent.clientX - rect.left;
-      setPosition(Math.max(0, Math.min(100, (x / rect.width) * 100)));
-    };
-    const up = () => {
-      document.removeEventListener("mousemove", move);
-      document.removeEventListener("mouseup", up);
-    };
-    document.addEventListener("mousemove", move);
-    document.addEventListener("mouseup", up);
-  };
-  return (
-    <div className="space-y-1">
-      <p className="text-[7px] hero-screen-muted">Glissez pour voir le résultat</p>
-      <div className="relative h-20 rounded-lg overflow-hidden border border-white/10 shadow-lg">
-        <div className="absolute inset-0">
-          <Image src="/rs3avant.png" alt="Avant" fill className="object-cover" sizes="200px" />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}>
-            <span className="text-[9px] font-bold text-white drop-shadow-md">AVANT</span>
-          </div>
-        </div>
-        <div className="absolute inset-0" style={{ clipPath: `inset(0 0 0 ${position}%)` }}>
-          <Image src="/rs3apres.png" alt="Après" fill className="object-cover" sizes="200px" />
-          <div className="absolute inset-0 flex items-center justify-end pr-1">
-            <span className="text-[9px] font-bold text-white drop-shadow-md">APRÈS</span>
-          </div>
-        </div>
-        <div
-          className="absolute top-0 bottom-0 w-0.5 cursor-ew-resize z-10 hero-slider-handle"
-          style={{ left: `${position}%`, background: screenColors.cyan }}
-          onMouseDown={handleMouseDown}
-        >
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white/80 hero-slider-knob" style={{ background: screenColors.cyan }} />
-        </div>
-      </div>
-    </div>
-  );
+function ContactFormPrefill({
+  setValue,
+}: {
+  setValue: (name: "city" | "message", value: string) => void;
+}) {
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const metier = searchParams.get("metier");
+    const zone = searchParams.get("zone");
+    const ville = searchParams.get("ville");
+    if (metier || zone || ville) {
+      if (ville) {
+        const cityLabel = ZONE_VILLES_ALL.find((c) => c.id === ville)?.label ?? ville;
+        setValue("city", cityLabel);
+      }
+      const line = `[Métier: ${metier ?? "-"} | Zone: ${zone ?? "-"} | Ville: ${ville ?? "-"}]\n\n`;
+      setValue("message", line);
+    }
+  }, [searchParams, setValue]);
+  return null;
 }
 
-function ScreenGaragePreview() {
-  const services = [
-    { icon: Wrench, label: "Débosselage" },
-    { icon: Shield, label: "Pare-brise" },
-    { icon: Zap, label: "Polissage" },
-  ];
+const AUTO_FLIP_INTERVAL_MS = 8000;
+
+function CaseStudyFlipCard() {
+  const prefersReducedMotion = useReducedMotion();
+  const [flipped, setFlipped] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [autoFlipDisabled, setAutoFlipDisabled] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (prefersReducedMotion || autoFlipDisabled) return;
+    const id = setInterval(() => setFlipped((prev) => !prev), AUTO_FLIP_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [prefersReducedMotion, autoFlipDisabled]);
+
+  const handleToggle = () => {
+    setAutoFlipDisabled(true);
+    setFlipped((prev) => !prev);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      if (!isDesktop) handleToggle();
+    }
+  };
+
+  const onWrapperInteraction = () => {
+    if (!isDesktop) {
+      setAutoFlipDisabled(true);
+      handleToggle();
+    }
+  };
+
+  const cardContent = (
+    <div className="flex h-full flex-col">
+      <div className="flex shrink-0 items-start justify-between gap-2">
+        <h3 className="font-heading text-lg font-semibold uppercase tracking-wider text-[var(--text-2)]">
+          Avant
+        </h3>
+        <span className="md:hidden text-xs text-[var(--text-2)] opacity-70">↻ APRÈS</span>
+      </div>
+      <ul className="mt-3 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1 text-xs text-[var(--text-2)]">
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--text-2)]" />
+          Pas de site web
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--text-2)]" />
+          Dépendance totale à Facebook
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--text-2)]" />
+          Peu d&apos;appels entrants
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--text-2)]" />
+          Aucune visibilité sur Google quand on tape &quot;garage + ville&quot;
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--text-2)]" />
+          Horaires introuvables en dehors de Facebook
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--text-2)]" />
+          Clients qui appellent hors zone ou pour des services non proposés
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--text-2)]" />
+          Pas de bouton WhatsApp, donc perte des clients mobiles
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--text-2)]" />
+          Impossible de montrer les réalisations ou avis clients
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--text-2)]" />
+          Image peu professionnelle face aux concurrents
+        </li>
+      </ul>
+      <p className="mt-3 shrink-0 border-t border-[var(--border)] pt-3 text-[11px] font-medium text-[var(--text-2)]">
+        → Impact réel : Perte d&apos;opportunités chaque semaine sans même le savoir.
+      </p>
+    </div>
+  );
+
+  const cardContentApres = (
+    <div className="flex h-full flex-col">
+      <div className="flex shrink-0 items-start justify-between gap-2">
+        <h3 className="font-heading text-lg font-semibold uppercase tracking-wider text-[var(--accent)]">
+          Après 30 jours
+        </h3>
+        <span className="md:hidden text-xs text-[var(--text-2)] opacity-70">AVANT ↻</span>
+      </div>
+      <ul className="mt-3 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1 text-xs text-[var(--text)]">
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--accent)]" />
+          +28&nbsp;% d&apos;appels
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--accent)]" />
+          12 demandes WhatsApp qualifiées
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--accent)]" />
+          +28&nbsp;% de rendez-vous
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--accent)]" />
+          Apparition dans les recherches locales &quot;garage + ville&quot;
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--accent)]" />
+          Appel en 1 clic directement depuis mobile
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--accent)]" />
+          WhatsApp actif 7j/7 pour les urgences
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--accent)]" />
+          Moins d&apos;appels hors zone grâce à une zone clairement affichée
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--accent)]" />
+          Demandes structurées (plus de &quot;vous faites quoi ?&quot;)
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--accent)]" />
+          Image professionnelle et rassurante
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--accent)]" />
+          Moins de dépendance à Facebook
+        </li>
+      </ul>
+      <p className="mt-3 shrink-0 border-t border-[var(--border)] pt-3 text-[11px] font-medium text-[var(--accent)]">
+        → Impact réel : Des demandes plus qualifiées, moins de perte de temps, plus de rendez-vous.
+      </p>
+    </div>
+  );
+
+  if (prefersReducedMotion) {
+    return (
+      <div className="w-full max-w-xl min-w-[280px]" aria-live="polite">
+        <div className="relative min-h-[380px]">
+          <motion.div
+            className="absolute inset-0 flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-6 py-6 lg:px-8 lg:py-8"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: flipped ? 0 : 1 }}
+            transition={{ duration: 0.2 }}
+          >
+            {cardContent}
+          </motion.div>
+          <motion.div
+            className="absolute inset-0 flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] px-6 py-6 lg:px-8 lg:py-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: flipped ? 1 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {cardContentApres}
+          </motion.div>
+        </div>
+        <button
+          type="button"
+          onClick={handleToggle}
+          onKeyDown={handleKeyDown}
+          aria-pressed={flipped}
+          className="mt-3 w-full rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-4 py-1.5 text-center text-[11px] font-medium text-[var(--text-2)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
+        >
+          {flipped ? "Voir AVANT" : "Voir APRÈS"}
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="hero-screen-content relative w-full h-full overflow-hidden hero-screen-root" style={{ background: screenColors.bg }}>
-      <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-30 pointer-events-none hero-screen-glow" aria-hidden />
-      <div className="hero-screen-grain pointer-events-none" aria-hidden />
-      <div className="flex items-center gap-2 border-b border-white/10 px-2 py-1.5 hero-screen-bar" style={{ background: screenColors.surface }}>
-        <div className="flex gap-0.5">
-          <div className="h-1.5 w-1.5 rounded-full bg-red-500" />
-          <div className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-          <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <span className="text-[8px] hero-screen-muted">atelier-demo.be</span>
-        </div>
-        <span className="text-[7px] font-medium px-1.5 py-0.5 rounded hero-screen-badge" style={{ background: screenColors.lime, color: "#0B0D10" }}>DISPONIBLE 7J/7</span>
-      </div>
-      <div className="h-[calc(100%-2rem)] overflow-hidden overflow-x-hidden">
-        <div className="px-2.5 py-2 space-y-2 hero-screen-body hero-screen-autoscroll" style={{ color: screenColors.text }}>
-          <div>
-            <h2 className="text-[11px] font-bold tracking-tight hero-screen-title">Carrosserie & Pare-brise</h2>
-            <p className="text-[8px] mt-0.5 hero-screen-muted">Devis en 2 min · RDV rapide · Assurance OK</p>
-          </div>
-          <div className="space-y-0.5">
-            <div className="flex gap-1.5">
-              <div className="flex-1 flex items-center justify-center gap-1 rounded-md py-1.5 text-[9px] font-bold text-[#0B0D10] hero-screen-cta-primary">
-                <FileText className="h-2.5 w-2.5" />
-                Demander un devis
-              </div>
-              <div className="flex-1 flex items-center justify-center gap-1 rounded-md py-1.5 text-[9px] font-medium border hero-screen-cta-secondary">
-                <MessageCircle className="h-2.5 w-2.5" />
-                WhatsApp
-              </div>
-            </div>
-            <p className="text-[7px] hero-screen-muted">Réponse en &lt; 30 min aux heures d&apos;ouverture</p>
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {["Avant/Après", "RDV 48h", "Assurance"].map((chip) => (
-              <span key={chip} className="px-2 py-0.5 rounded-full text-[7px] font-medium border border-white/10 hero-screen-chip" style={{ background: screenColors.surface }}>{chip}</span>
-            ))}
-          </div>
-          <div>
-            <p className="text-[8px] font-semibold mb-1 hero-screen-title">Avant / Après</p>
-            <BeforeAfterMini />
-          </div>
-          <div>
-            <p className="text-[8px] font-semibold mb-1 hero-screen-title">Services express</p>
-            <div className="grid grid-cols-3 gap-1">
-              {services.map(({ icon: Icon, label }) => (
-                <div key={label} className="hero-screen-card flex flex-col items-center justify-center p-1.5 rounded-md border border-white/10 text-center" style={{ background: screenColors.surface }}>
-                  <Icon className="h-3 w-3 mb-0.5 hero-screen-icon" style={{ color: screenColors.cyan }} />
-                  <span className="text-[7px] hero-screen-muted">{label}</span>
-                </div>
-              ))}
+    <div className="w-full max-w-xl min-w-[280px]">
+      <span className="sr-only">Carte recto-verso : Avant et Après 30 jours.</span>
+      <div
+        className={cn("flipWrap relative min-h-[380px] w-full rounded-2xl border border-[var(--border)] outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] md:focus-within:ring-2 md:focus-within:ring-[var(--accent)] md:focus-within:ring-offset-2 md:focus-within:ring-offset-[var(--bg)]", flipped && "isFlipped")}
+        tabIndex={0}
+        role="region"
+        aria-label="Étude de cas Avant / Après 30 jours"
+        onMouseEnter={() => isDesktop && setFlipped(true)}
+        onMouseLeave={() => isDesktop && setFlipped(false)}
+        onFocus={() => isDesktop && setFlipped(true)}
+        onBlur={(e) => {
+          if (isDesktop && !e.currentTarget.contains(e.relatedTarget as Node)) setFlipped(false);
+        }}
+        onClick={onWrapperInteraction}
+        onKeyDown={handleKeyDown}
+      >
+        {/* Do NOT add Tailwind transform/rotate/scale/translate to flipInner, flipFace, flipBack, flipBackContent — controlled by globals.css; iOS uses 2D opacity fallback. */}
+        <div className="flipInner relative h-full min-h-[380px] w-full">
+          <div className="flipFace absolute inset-0 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+            <div className="flex h-full w-full flex-col px-6 py-6 lg:px-8 lg:py-8">
+              {cardContent}
             </div>
           </div>
-          <div className="rounded-md border border-white/10 p-2 hero-screen-card" style={{ background: screenColors.surface }}>
-            <p className="text-[7px] font-semibold mb-1 hero-screen-title">Horaires</p>
-            <p className="text-[7px] leading-relaxed hero-screen-muted">Lun–Ven 8:00–18:00</p>
-            <p className="text-[7px] leading-relaxed hero-screen-muted">Sam 9:00–13:00</p>
-            <p className="text-[7px] mt-1.5 hero-screen-muted">Zone : Hainaut & alentours</p>
-            <span className="inline-block mt-1 text-[6px] font-medium px-1.5 py-0.5 rounded hero-screen-badge-cyan" style={{ background: `${screenColors.cyan}30`, color: screenColors.cyan }}>Appel 1 clic sur mobile</span>
+          <div className="flipBack absolute inset-0 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-2)]">
+            <div className="flipBackContent flex h-full w-full flex-col">
+              <div className="flipBackContentInner flex h-full w-full flex-col px-6 py-6 lg:px-8 lg:py-8">
+                {cardContentApres}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div className="hero-screen-glare pointer-events-none" aria-hidden />
+      <button
+        type="button"
+        onClick={handleToggle}
+        onKeyDown={handleKeyDown}
+        aria-pressed={flipped}
+        className="mt-3 w-full rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-4 py-1.5 text-center text-[11px] font-medium text-[var(--text-2)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
+      >
+        {flipped ? "Voir AVANT" : "Voir APRÈS"}
+      </button>
     </div>
   );
 }
@@ -299,41 +509,35 @@ function WhyItWorksSection() {
   return (
     <section
       id="services"
-      className="relative border-t border-[var(--border)] bg-[var(--bg-2)] px-4 py-20 sm:px-6 lg:px-10 lg:py-28"
+      className="relative border-t border-[var(--border)] bg-[var(--bg-2)] px-4 py-20 sm:px-6 lg:px-10 lg:py-32 overflow-x-hidden"
     >
-      <div className="mx-auto max-w-6xl lg:mx-auto">
+      <div className="mx-auto max-w-6xl w-full min-w-0 lg:mx-auto">
         <div className="grid gap-10 lg:grid-cols-1 lg:gap-12">
-          {/* Title + intro (full width on desktop) */}
-          <div className="max-w-md">
+          <div className="max-w-2xl">
+            <p className="section-eyebrow">Services</p>
             <motion.h2
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{
-                duration: 0.6,
-                delay: 0.1,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className="font-heading text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl lg:tracking-tight"
+              variants={scrollRevealInertia}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+              className="font-heading text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl lg:tracking-tight section-title-industrial"
             >
               Pourquoi ça marche
             </motion.h2>
             <motion.p
-              initial={{ opacity: 0, y: 8 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              variants={scrollRevealInertia}
+              initial="hidden"
+              whileInView="visible"
               viewport={{ once: true, margin: "-80px" }}
-              transition={{
-                duration: 0.6,
-                delay: 0.22,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className="mt-4 text-sm leading-relaxed text-[var(--text-2)] lg:mt-6 lg:text-base lg:leading-relaxed"
+              transition={{ type: "spring", stiffness: 280, damping: 26, delay: 0.06 }}
+              className="mt-4 text-sm leading-relaxed text-[var(--text-2)] lg:mt-6 lg:text-base lg:leading-relaxed max-w-2xl"
             >
               6 leviers concrets pour transformer votre trafic en appels, sans usine à gaz ni tunnel compliqué.
             </motion.p>
+            <div className="brand-signature-line hidden lg:block mt-4" aria-hidden />
           </div>
 
-          {/* Cards: 3 columns on desktop */}
+          {/* Cards: 3 columns on desktop — Phase 3: premium cards + corner highlight + icon motion */}
           <div className="space-y-4 lg:grid lg:grid-cols-3 lg:gap-6 lg:space-y-0">
             {whyCards.map((card, i) => (
               <div
@@ -342,38 +546,37 @@ function WhyItWorksSection() {
                 style={{ perspective: 1200 }}
               >
                 <motion.article
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{
-                    duration: 0.6,
-                    delay: 0.1 + i * 0.08,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                  whileHover={{ y: -4 }}
+                  variants={scrollRevealInertia}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ type: "spring", stiffness: 280, damping: 26, delay: 0.08 + i * 0.06 }}
+                  whileHover={{ y: -6 }}
                   className={cn(
                     "group relative flex gap-5 rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-5 backdrop-blur-sm transition-all duration-500 will-change-transform",
                     "hover:border-[var(--accent)] hover:bg-[var(--surface-2)] hover:shadow-[0_24px_60px_rgba(11,18,32,0.9)]",
-                    "lg:flex-col lg:rounded-2xl lg:p-8 lg:card-premium"
+                    "lg:flex-col lg:rounded-2xl lg:p-8 lg:card-premium lg:why-card-premium lg:section-depth-card"
                   )}
                 >
+                  {/* Phase 3: corner highlight (desktop only) */}
+                  <div className="why-card-corner-highlight hidden lg:block" aria-hidden />
                   {/* Left accent line */}
                   <div className="absolute inset-y-4 left-0 w-[3px] rounded-full bg-[var(--surface-2)] group-hover:bg-gradient-to-b group-hover:from-[var(--accent)] group-hover:via-[var(--accent-2)] group-hover:to-[var(--accent)] transition-all duration-300" />
 
-                  {/* Icon container */}
+                  {/* Icon container — Phase 3: why-icon-badge for desktop hover */}
                   <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
                     whileInView={{ scale: 1, opacity: 1 }}
-                    viewport={{ once: true, margin: "-50px" }}
+                    viewport={{ once: true, margin: "-80px" }}
                     transition={{
                       duration: 0.5,
-                      delay: 0.18 + i * 0.08,
+                      delay: 0.2 + i * 0.08,
                       ease: [0.22, 1, 0.36, 1],
                     }}
                     className="relative shrink-0"
                   >
-                    <div className="relative rounded-xl bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] p-3 backdrop-blur-sm transition-all duration-500 group-hover:bg-[color-mix(in_srgb,var(--accent)_20%,transparent)] group-hover:shadow-[0_0_30px_rgba(245,165,36,0.4)] icon-hover-glow">
-                      <card.icon className="h-6 w-6 text-[var(--accent)] transition-transform duration-500" />
+                    <div className="relative rounded-xl bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] p-3 backdrop-blur-sm lg:rounded-2xl lg:p-4 transition-all duration-500 group-hover:bg-[color-mix(in_srgb,var(--accent)_20%,transparent)] group-hover:shadow-[0_0_30px_rgba(245,165,36,0.4)] icon-hover-glow why-icon-badge">
+                      <card.icon className="h-6 w-6 text-[var(--accent)] transition-transform duration-500 lg:h-7 lg:w-7" />
                     </div>
                   </motion.div>
 
@@ -419,8 +622,134 @@ function WhyItWorksSection() {
   );
 }
 
-export default function Home() {
-  const [activeDemo, setActiveDemo] = useState<"garage" | "depannage" | "carrosserie">("garage");
+function PricingSection() {
+  return (
+    <section
+      id="offres"
+      className="relative border-t border-[var(--border)] bg-[var(--bg)] px-4 py-20 sm:px-6 lg:px-10 lg:py-32 overflow-x-hidden"
+      aria-labelledby="offres-heading"
+    >
+      <div className="mx-auto max-w-6xl w-full min-w-0">
+        <p className="section-eyebrow">Offres</p>
+        <motion.h2
+          id="offres-heading"
+          variants={scrollRevealInertia}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+          className="font-heading text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl lg:text-5xl section-title-industrial"
+        >
+          Une structure claire, pensée pour la conversion
+        </motion.h2>
+        <div className="brand-signature-line hidden lg:block mt-4" aria-hidden />
+        <motion.p
+          variants={scrollRevealInertia}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ type: "spring", stiffness: 280, damping: 26, delay: 0.05 }}
+          className="mt-3 text-sm leading-relaxed text-[var(--text-2)] max-w-2xl"
+        >
+          Trois niveaux, un objectif : des sites conçus pour générer des appels et des contacts. Pas d&apos;usine à gaz — une progression logique selon vos besoins.
+        </motion.p>
+
+        <div className="mt-12 grid gap-6 lg:grid-cols-3 lg:gap-8">
+          {pricingPackages.map((pkg, i) => (
+            <motion.article
+              key={pkg.id}
+              variants={scrollRevealInertia}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ type: "spring", stiffness: 280, damping: 26, delay: 0.06 + i * 0.05 }}
+              className={cn(
+                "relative flex flex-col rounded-2xl border bg-[var(--surface)] p-6 backdrop-blur-sm transition-all duration-300",
+                "lg:p-8",
+                pkg.highlighted
+                  ? "border-[var(--accent)] shadow-[0_0_0_1px_var(--accent),0_20px_50px_rgba(0,0,0,0.4)] ring-1 ring-[var(--accent)]/20"
+                  : "border-[var(--border)] hover:border-[var(--border)] hover:bg-[var(--surface-2)]"
+              )}
+            >
+              {pkg.badge && (
+                <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1 rounded-full border border-[var(--accent)] bg-[var(--bg)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                  <Sparkles className="h-3 w-3" />
+                  {pkg.badge}
+                </div>
+              )}
+              <div className="flex flex-col flex-1">
+                <h3 className="font-heading text-lg font-bold tracking-tight text-[var(--text)] sm:text-xl">
+                  {pkg.name}
+                </h3>
+                <p className="mt-1 text-2xl font-bold tabular-nums text-[var(--text)] sm:text-3xl">
+                  {pkg.price}&nbsp;€
+                </p>
+                <p className="mt-2 text-sm font-medium text-[var(--text-2)]">
+                  {pkg.tagline}
+                </p>
+                <p className="mt-1 text-xs text-[var(--text-2)]">
+                  {pkg.sub}
+                </p>
+                <ul className="mt-6 space-y-2.5 flex-1">
+                  {pkg.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2 text-sm text-[var(--text-2)]">
+                      <Check className="h-4 w-4 shrink-0 mt-0.5 text-[var(--accent)]" aria-hidden />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <motion.a
+                  href="#contact"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={cn(
+                    "mt-8 block w-full rounded-lg py-3 text-center text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]",
+                    pkg.highlighted
+                      ? "bg-[var(--accent)] text-black hover:bg-[var(--accent-2)]"
+                      : "border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] hover:border-[var(--accent)] hover:bg-[color-mix(in_srgb,var(--accent)_8%,transparent)]"
+                  )}
+                >
+                  Choisir {pkg.name}
+                </motion.a>
+              </div>
+            </motion.article>
+          ))}
+        </div>
+
+        <motion.div
+          variants={scrollRevealInertia}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ type: "spring", stiffness: 280, damping: 26, delay: 0.15 }}
+          className="mt-10 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-6 py-5 sm:flex sm:items-center sm:justify-between sm:gap-6 lg:px-8"
+        >
+          <div>
+            <p className="font-heading text-base font-semibold text-[var(--text)]">
+              {monthlyAddOn.label} — {monthlyAddOn.price}&nbsp;€/mois
+            </p>
+            <p className="mt-0.5 text-sm text-[var(--text-2)]">
+              {monthlyAddOn.tagline}
+            </p>
+            <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--text-2)] sm:mt-2">
+              {monthlyAddOn.features.map((f) => (
+                <li key={f} className="flex items-center gap-1.5">
+                  <Check className="h-3.5 w-3.5 text-[var(--accent)] shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <p className="mt-4 text-xs text-[var(--text-2)] sm:mt-0 sm:text-right">
+            Optionnelle. Compatible avec chaque offre.
+          </p>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function Home() {
+  const [activeDemo, setActiveDemo] = useState<"garage" | "depannage" | "carrosserie" | "detailing">("garage");
 
   const activeDemoData = demos.find((d) => d.id === activeDemo) ?? demos[0];
 
@@ -428,11 +757,13 @@ export default function Home() {
     garage: "/demo-garage",
     depannage: "/demo-depannage",
     carrosserie: "/demo-carrosserie",
+    detailing: "/demo-detailing",
   };
 
   const {
     register,
     handleSubmit,
+    setValue,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ContactFormData>({
@@ -441,6 +772,34 @@ export default function Home() {
 
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
   const [submitError, setSubmitError] = useState<string>("");
+  const [navScrolled, setNavScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("services");
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const onScroll = () => setNavScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const sectionIds = ["services", "pertes", "demo", "parlons-projet", "resultats", "methode", "preuves", "qui", "offres", "contact"];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActiveSection(entry.target.id);
+        });
+      },
+      { rootMargin: "-20% 0px -60% 0px", threshold: 0 }
+    );
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
 
   const onSubmit = async (data: ContactFormData) => {
     setSubmitStatus("idle");
@@ -466,28 +825,51 @@ export default function Home() {
   };
 
   return (
-    <div className="site-main min-h-screen">
+    <div className="site-main min-h-screen min-h-[100dvh]">
+      {/* Phase 1: Cinematic Art Direction Layer (desktop only) */}
+      <div className="cinematic-grain" aria-hidden />
+      <div className="cinematic-blob-hero" aria-hidden />
+      <div className="cinematic-blob-macbook" aria-hidden />
+      <div className="cinematic-blob-mid" aria-hidden />
+      <div className="cinematic-sheen" aria-hidden />
+
+      {/* Base textures */}
       <div className="noise" aria-hidden />
       <div className="speed-lines" aria-hidden />
 
-      <nav className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_80%,transparent)] backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6 lg:max-w-7xl lg:px-10">
-          <a href="#" className="font-heading text-lg font-semibold tracking-tight text-[var(--text)]">
+      <nav
+        className={cn(
+          "nav-bar sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_85%,transparent)] backdrop-blur-xl transition-colors duration-300",
+          navScrolled && "nav-bar-scrolled"
+        )}
+      >
+        <div className="mx-auto flex h-16 max-w-6xl w-full min-w-0 items-center justify-between gap-6 px-4 sm:px-6 lg:max-w-7xl lg:px-10">
+          <Link href="/" className="font-heading text-lg font-semibold tracking-tight text-[var(--text)]">
             VIGI AGENCY
-          </a>
+          </Link>
           <div className="hidden items-center gap-8 md:flex">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-sm text-[var(--text-2)] transition hover:text-[var(--accent)] lg:tracking-wide"
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const sectionId = link.href.slice(1);
+              const isActive = activeSection === sectionId;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  data-active={isActive}
+                  className={cn(
+                    "text-sm transition duration-200 lg:tracking-wide",
+                    isActive ? "text-[var(--accent)]" : "text-[var(--text-2)] hover:text-[var(--accent)]"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
           <a
-            href="#contact"
+            href="https://wa.me/32468367226?text=Bonjour%2C%20je%20souhaite%20parler%20d%27un%20site%20web%20pour%20mon%20garage%20%2F%20service%20de%20depannage."
+            target="_blank"
+            rel="noopener noreferrer"
             className="shrink-0 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-sm font-medium text-black transition hover:bg-[var(--accent-2)] hover:shadow-lg hover:shadow-[0_0_30px_rgba(245,183,3,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
           >
             Être rappelé
@@ -495,152 +877,24 @@ export default function Home() {
         </div>
       </nav>
 
-      <main className="relative z-10 pb-28 sm:pb-0">
+      <main className="relative z-10 overflow-x-hidden overflow-y-visible pb-28 sm:pb-0">
         {/* Hero */}
-        <section className="relative overflow-hidden px-4 pt-16 pb-24 sm:px-6 sm:pt-24 sm:pb-32 lg:px-10 lg:pt-28 lg:pb-36">
-          <div className="absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg)] via-[var(--bg)] to-[var(--bg)]" />
-            <div className="hero-spotlight" aria-hidden />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_100%_at_50%_100%,rgba(0,0,0,0.5),transparent_70%)]" />
-          </div>
-
-          <div className="mx-auto grid max-w-6xl gap-12 lg:max-w-7xl lg:grid-cols-2 lg:items-center lg:gap-14 lg:pt-8">
-            <div className="flex flex-col justify-center lg:max-w-[560px]">
-              <motion.div
-                variants={heroContainer}
-                initial="hidden"
-                animate="visible"
-                className="space-y-7 sm:space-y-8"
-              >
-                <motion.span
-                  variants={heroItem}
-                  className="inline-flex items-center gap-2 rounded-full border-[var(--border)] bg-[var(--surface)] px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--accent)] lg:tracking-[0.2em]"
-                >
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(16,185,129,0.35)]" />
-                  Spécialiste garages & urgences — Hainaut
-                </motion.span>
-                <div className="space-y-4">
-                  <motion.h1
-                    variants={heroItem}
-                    className="font-heading text-3xl font-bold leading-[1.05] tracking-tight text-[var(--text)] sm:text-4xl lg:text-[clamp(2.5rem,4.4vw,4.875rem)] lg:leading-[0.95]"
-                  >
-                    <span className="block">Des sites qui font</span>
-                    <span className="block text-[var(--accent)]">sonner le téléphone.</span>
-                  </motion.h1>
-                  <motion.p
-                    variants={heroItem}
-                    className="max-w-lg text-[15px] sm:text-base font-medium leading-relaxed text-[var(--text-2)] lg:max-w-[52ch] lg:text-[18px] lg:leading-relaxed"
-                  >
-                    Pages d’urgence, SEO local, WhatsApp, appel 1 clic. Pensé pour la route et pour les garages du
-                    Hainaut.
-                  </motion.p>
-                </div>
-                <motion.div
-                  variants={heroItem}
-                  className="flex flex-wrap gap-3 lg:flex-row lg:gap-4"
-                >
-                  <motion.a
-                    href="#demo"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.96 }}
-                    className="group relative inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-5 py-2.75 text-sm font-semibold text-black shadow-[0_0_40px_rgba(245,165,36,0.35)] outline-none transition hover:bg-[var(--accent-2)] hover:shadow-[0_0_48px_rgba(255,183,3,0.4)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
-                    aria-label="Voir la démo"
-                  >
-                    <span className="relative z-10 flex items-center gap-2">
-                      Voir une démo
-                      <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                    </span>
-                    <span className="pointer-events-none absolute inset-0 rounded-lg bg-[radial-gradient(circle_at_10%_0%,rgba(255,255,255,0.32),transparent_55%)] opacity-0 transition group-hover:opacity-100" />
-                  </motion.a>
-                  <motion.a
-                    href="#contact"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.97 }}
-                    className="inline-flex items-center gap-2 rounded-lg border-[var(--border)] bg-[var(--surface)] px-5 py-2.5 text-sm font-medium text-[var(--text)] outline-none transition hover:bg-[var(--surface-2)] hover:border-[var(--accent)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
-                    aria-label="Parler d'un projet"
-                  >
-                    Parler d’un projet
-                  </motion.a>
-                </motion.div>
-                <p className="text-xs text-[var(--text-2)] lg:mt-2">
-                  Aucune obligation – juste un aperçu concret.
-                </p>
-                <motion.div
-                  variants={heroItem}
-                  className="space-y-1.5 text-xs sm:text-sm text-[var(--text-2)] lg:mt-6 lg:space-y-2 lg:hidden"
-                >
-                  <p className="font-medium text-[var(--text)] lg:leading-relaxed">
-                    Réponse rapide • Déploiement en 72h
-                  </p>
-                  <p className="text-[var(--text-2)]">
-                    On s'occupe du site, vous vous occupez des véhicules.
-                  </p>
-                </motion.div>
-              </motion.div>
-            </div>
-
-            <motion.div
-              variants={heroMockup}
-              initial="hidden"
-              animate="visible"
-              className="relative flex items-center justify-center lg:justify-end"
-            >
-              {/* Radial glow behind mockup - desktop only */}
-              <div 
-                aria-hidden 
-                className="pointer-events-none absolute inset-0 hidden lg:block" 
-                style={{ 
-                  background: "radial-gradient(ellipse 90% 70% at 60% 50%, rgba(245,165,36,0.12), transparent 60%)",
-                  filter: "blur(40px)",
-                }} 
-              />
-              <div 
-                aria-hidden 
-                className="pointer-events-none absolute inset-0 hidden lg:block" 
-                style={{ 
-                  background: "radial-gradient(circle at 50% 80%, rgba(245,165,36,0.06), transparent 50%)",
-                }} 
-              />
-              <div className="relative w-full max-w-[900px] mx-auto overflow-hidden lg:scale-[1.08] mockup-cinematic">
-                {/* SCREEN MASK - dimensions verrouillées */}
-                <div
-                  className="hero-mockup-screen absolute z-10 overflow-hidden rounded-[8px]"
-                  style={{
-                    top: "12%",
-                    left: "10.4%",
-                    width: "79.2%",
-                    height: "81.4%",
-                  }}
-                >
-                  <ScreenGaragePreview />
-                </div>
-
-                {/* MACBOOK FRAME */}
-                <Image
-                  src="/apple-macbookpro14-front.png"
-                  alt="MacBook Pro"
-                  width={3944}
-                  height={2564}
-                  className="relative z-20 w-full h-auto drop-shadow-[0_40px_120px_rgba(0,0,0,0.8)] lg:drop-shadow-[0_40px_120px_rgba(0,0,0,0.75)]"
-                  priority
-                />
-              </div>
-            </motion.div>
-          </div>
-        </section>
+        <Hero />
 
         {/* Why it works - Premium Animated */}
         <WhyItWorksSection />
 
         {/* Ce qu'un garage perd sans site optimisé */}
-        <section id="pertes" className="border-t border-[var(--border)] bg-[var(--bg)] px-4 py-16 sm:px-6 sm:py-20 lg:px-10 lg:py-28">
-          <div className="mx-auto max-w-6xl">
-            <h2 className="font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl lg:text-4xl lg:max-w-2xl">
+        <section id="pertes" className="relative border-t border-[var(--border)] bg-[var(--bg)] px-4 py-16 sm:px-6 sm:py-20 lg:px-10 lg:py-32 overflow-x-hidden">
+          <div className="mx-auto max-w-6xl w-full min-w-0 relative z-10">
+            <p className="section-eyebrow">Constat</p>
+            <h2 className="font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl lg:text-4xl section-title-industrial max-w-2xl">
               Ce qu&apos;un garage perd sans site optimisé
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-[var(--text-2)] lg:mt-4 lg:max-w-2xl">
+            <p className="mt-3 text-sm leading-relaxed text-[var(--text-2)] lg:mt-4 max-w-2xl">
               Sans site adapté à la recherche locale, les clients potentiels passent à côté de votre atelier.
             </p>
+            <div className="brand-signature-line hidden lg:block mt-4" aria-hidden />
 
             <div className="mt-8 space-y-6 sm:mt-10 lg:mt-12 lg:grid lg:grid-cols-3 lg:gap-8 lg:space-y-0">
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-5 py-5 lg:rounded-2xl lg:p-6">
@@ -671,23 +925,34 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Demonstrations - tabs + preview */}
-        <section id="demo" className="border-t border-[var(--border)] bg-[var(--bg-2)] px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
-          <div className="mx-auto max-w-6xl lg:max-w-6xl">
+        {/* Demonstrations */}
+        <section id="demo" className="relative section-radial-highlight border-t border-[var(--border)] bg-[var(--bg-2)] px-4 py-20 sm:px-6 lg:px-10 lg:py-32 overflow-x-hidden">
+          <div className="mx-auto max-w-6xl w-full min-w-0 relative z-10">
+            <p className="section-eyebrow">Démos</p>
             <motion.h2
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="font-heading text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl lg:tracking-tight lg:text-5xl"
+              variants={scrollRevealInertia}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+              className="font-heading text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl lg:tracking-tight lg:text-5xl section-title-industrial"
             >
               Démonstrations
             </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.5, delay: 0.08 }}
+              className="mt-3 text-sm text-[var(--text-2)] max-w-2xl"
+            >
+              Chaque démo est adaptée à un métier précis. Le contenu, le rythme et les appels à l&apos;action changent selon votre activité.
+            </motion.p>
+            <div className="brand-signature-line hidden lg:block mt-4" aria-hidden />
 
-            <div className="mt-8 lg:mt-10">
-              {/* Tabs + bullets */}
-              <div>
-                <div className="inline-flex rounded-full border border-[var(--border)] bg-[var(--surface-2)] p-1 text-xs">
+            <div className="mt-8 lg:mt-10 w-full min-w-0">
+              {/* Tabs */}
+              <div className="w-full min-w-0">
+                <div className="inline-flex flex-wrap gap-1 rounded-full border border-[var(--border)] bg-[var(--surface-2)] p-1 text-xs max-w-full">
                   {demos.map((demo) => (
                     <button
                       key={demo.id}
@@ -707,71 +972,157 @@ export default function Home() {
                   ))}
                 </div>
 
-                <motion.div
+                {/* Card: entire card clickable on desktop (motion.a) + sheen + microtext */}
+                <motion.a
                   key={activeDemo}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                  className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 backdrop-blur-sm lg:mt-10 lg:p-10 lg:rounded-3xl demo-card-hover"
+                  href={demoHref[activeDemo]}
+                  variants={scrollRevealInertia}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ type: "spring", stiffness: 280, damping: 26, delay: 0.1 }}
+                  className={cn(
+                    "group/card block mt-6 w-full min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 backdrop-blur-sm lg:mt-10 lg:p-10 lg:rounded-3xl demo-card-hover demo-card-product lg:section-depth-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] overflow-hidden",
+                    activeDemo === "depannage" && "demo-card-depannage"
+                  )}
+                  aria-label={`${activeDemoData.ctaLabel} — ${activeDemoData.title}`}
                 >
-                  <div className="flex items-center gap-2 lg:gap-3">
-                    <div className="inline-flex rounded-lg bg-[var(--accent)]/10 p-2 text-[var(--accent)] lg:p-3">
-                      <activeDemoData.icon className="h-4 w-4 lg:h-5 lg:w-5" />
+                  {/* Phase 3: sheen overlay (desktop) */}
+                  <div className="demo-card-sheen hidden lg:block" aria-hidden />
+                  <div className="relative">
+                    <div className="flex items-center gap-2 lg:gap-3">
+                      <div className="demo-card-icon-wrap inline-flex rounded-lg bg-[var(--accent)]/10 p-2 text-[var(--accent)] lg:p-3 transition-shadow duration-300">
+                        <activeDemoData.icon className="h-4 w-4 lg:h-5 lg:w-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-heading text-base sm:text-lg lg:text-xl font-semibold text-[var(--text)]">
+                          {activeDemoData.title}
+                        </h3>
+                        <p className="text-xs lg:text-sm text-[var(--text-2)] lg:mt-1">
+                          {activeDemoData.previewTitle}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-heading text-base sm:text-lg lg:text-xl font-semibold text-[var(--text)]">
-                        {activeDemoData.title}
-                      </h3>
-                      <p className="text-xs lg:text-sm text-[var(--text-2)] lg:mt-1">
-                        Structure pensée pour générer des appels qualifiés, pas juste “un joli site”.
+
+                    <ul className="mt-4 lg:mt-6 space-y-1.5 lg:space-y-2 text-sm lg:text-base text-[var(--text)]">
+                      {activeDemoData.bullets.map((item) => (
+                        <li key={item} className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 lg:h-2 lg:w-2 rounded-full bg-[var(--accent)]" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <p className="mt-4 lg:mt-6 text-sm lg:text-base text-[var(--text-2)] lg:hidden">
+                      {activeDemoData.previewCopy}
+                    </p>
+
+                    <div className="mt-5 lg:mt-7">
+                      <span className="inline-flex items-center gap-2 rounded-lg border border-[var(--accent)] bg-[var(--accent)]/10 px-4 py-2 text-sm lg:text-base font-medium text-[var(--accent)] transition group-hover/card:bg-[var(--accent)]/20">
+                        {activeDemoData.ctaLabel}
+                        <ChevronRight className="h-4 w-4" />
+                      </span>
+                      {/* Phase 3: micro-line under CTA (desktop only) */}
+                      <p className="demo-microtext hidden lg:block">
+                        {activeDemoData.previewCopy}
                       </p>
                     </div>
                   </div>
-
-                  <ul className="mt-4 lg:mt-6 space-y-1.5 lg:space-y-2 text-sm lg:text-base text-[var(--text)]">
-                    {activeDemoData.bullets.map((item) => (
-                      <li key={item} className="flex items-center gap-2">
-                        <span className="h-1.5 w-1.5 lg:h-2 lg:w-2 rounded-full bg-[var(--accent)]" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="mt-5 lg:mt-7 space-y-2">
-                    <motion.a
-                      href={demoHref[activeDemo]}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.97 }}
-                      className="inline-flex items-center gap-2 rounded-lg border border-[var(--accent)] bg-[var(--accent)]/10 px-4 py-2 text-sm lg:text-base font-medium text-[var(--accent)] outline-none transition hover:bg-[var(--accent)]/20 focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
-                      aria-label="Voir la démo"
-                    >
-                      Voir démo
-                      <ChevronRight className="h-4 w-4" />
-                    </motion.a>
-                    <p className="text-xs lg:text-sm text-[var(--text-2)]">
-                      {activeDemoData.ctaDescription}
-                    </p>
-                  </div>
-                </motion.div>
+                </motion.a>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Process */}
-        <section id="methode" className="border-t border-[var(--border)] bg-[var(--bg)] px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
-          <div className="mx-auto max-w-6xl">
+        {/* Post-demo CTA — conversion block */}
+        <section id="parlons-projet" className="border-t border-[var(--border)] bg-[var(--bg)] px-4 py-16 sm:px-6 sm:py-20 lg:px-10 lg:py-24 overflow-x-hidden" style={{ background: "linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 100%)" }}>
+          <div className="mx-auto max-w-3xl w-full min-w-0 text-center">
             <motion.h2
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="font-heading text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl lg:text-5xl"
+              className="font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl"
+            >
+              Vous avez vu un exemple. Parlons du vôtre.
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.05 }}
+              className="mt-3 text-sm text-[var(--text-2)]"
+            >
+              Une courte discussion suffit pour voir si votre activité peut en profiter.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="mt-6 flex flex-wrap items-center justify-center gap-3"
+            >
+              <Link
+                href="#contact"
+                className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-[var(--accent-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+              >
+                Discuter de mon projet
+              </Link>
+              <a
+                href="https://wa.me/32468367226?text=Bonjour%2C%20je%20souhaite%20parler%20d%27un%20site%20web%20pour%20mon%20garage%20%2F%20service%20de%20depannage."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-5 py-2.5 text-sm font-medium text-[var(--text)] transition hover:bg-[var(--surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+              >
+                Être rappelé
+              </a>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Étude de cas */}
+        <section id="resultats" className="border-t border-[var(--border)] bg-[var(--bg)] px-4 py-20 sm:px-6 lg:px-10 lg:py-32 overflow-x-hidden">
+          <div className="mx-auto max-w-6xl w-full min-w-0">
+            <p className="section-eyebrow">Résultats</p>
+            <motion.h2
+              variants={scrollRevealInertia}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+              className="font-heading text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl lg:text-5xl section-title-industrial"
+            >
+              Étude de cas — Garage local
+            </motion.h2>
+            <div className="brand-signature-line hidden lg:block mt-4" aria-hidden />
+            <div className="mt-10 grid grid-cols-1 justify-items-center">
+              <motion.div
+                className="w-full max-w-xl min-w-0"
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                <CaseStudyFlipCard />
+              </motion.div>
+            </div>
+            <p className="mt-6 text-xs text-[var(--text-2)]">
+              Exemple représentatif d&apos;un garage indépendant.
+            </p>
+          </div>
+        </section>
+
+        {/* Process */}
+        <section id="methode" className="border-t border-[var(--border)] bg-[var(--bg-2)] px-4 py-20 sm:px-6 lg:px-10 lg:py-32 overflow-x-hidden">
+          <div className="mx-auto max-w-6xl w-full min-w-0">
+            <p className="section-eyebrow">Process</p>
+            <motion.h2
+              variants={scrollRevealInertia}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+              className="font-heading text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl lg:text-5xl section-title-industrial"
             >
               Méthode
             </motion.h2>
+            <div className="brand-signature-line hidden lg:block mt-4" aria-hidden />
             <div className="mt-10 grid gap-6 sm:grid-cols-3">
               {processSteps.map((item, i) => (
                 <motion.div
@@ -805,15 +1156,16 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Proofs instead of testimonials */}
-        <section id="avis" className="border-t border-[var(--border)] bg-[var(--bg-2)] px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
-          <div className="mx-auto max-w-6xl">
+        {/* Preuves — ce qu'on met en place sur chaque projet */}
+        <section id="preuves" className="border-t border-[var(--border)] bg-[var(--bg)] px-4 py-20 sm:px-6 lg:px-10 lg:py-32 overflow-x-hidden">
+          <div className="mx-auto max-w-6xl w-full min-w-0">
+            <p className="section-eyebrow">Preuves</p>
             <motion.h2
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="font-heading text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl lg:text-5xl"
+              variants={scrollRevealInertia}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+              className="font-heading text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl lg:text-5xl section-title-industrial"
             >
               Preuves
             </motion.h2>
@@ -825,6 +1177,7 @@ export default function Home() {
             >
               Des éléments concrets que l’on met en place sur chaque projet pour rassurer vos futurs clients.
             </motion.p>
+            <div className="brand-signature-line hidden lg:block mt-4" aria-hidden />
             <div className="mt-10 grid gap-6 md:grid-cols-3">
               <motion.article
                 initial={{ opacity: 0, y: 16 }}
@@ -892,18 +1245,69 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Contact */}
-        <section id="contact" className="border-t border-[var(--border)] bg-[var(--bg)] px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
-          <div className="mx-auto max-w-6xl">
-            <motion.h2
+        {/* Qui est derrière */}
+        <section id="qui" className="border-t border-[var(--border)] bg-[var(--bg-2)] px-4 py-20 sm:px-6 lg:px-10 lg:py-32 overflow-x-hidden">
+          <div className="mx-auto max-w-5xl lg:max-w-6xl w-full min-w-0">
+            <p className="section-eyebrow">L&apos;équipe</p>
+            <div className="brand-signature-line hidden lg:block mt-2 mb-6" aria-hidden />
+            <motion.div
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="font-heading text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl lg:text-5xl"
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="mt-10 lg:mt-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 lg:p-10"
+            >
+              <div className="space-y-4">
+                <h2 className="font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl">
+                  Qui est derrière VIGI AGENCY
+                </h2>
+                <p
+                  className="font-heading text-lg font-semibold sm:text-xl"
+                  style={{
+                    color: "#F59E0B",
+                    textShadow: "0 0 20px rgba(245, 158, 11, 0.35)",
+                  }}
+                >
+                  Mathis — Fondateur
+                </p>
+                <ul className="space-y-2 text-sm text-[var(--text-2)]">
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
+                    Spécialisé exclusivement garages & métiers auto
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
+                    Approche orientée appels et résultats concrets
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
+                    Déploiement rapide, sans complexité technique
+                  </li>
+                </ul>
+                <p className="text-sm leading-relaxed text-[var(--text-2)] pt-1">
+                  Je me concentre sur les garages et artisans de l&apos;auto parce que c&apos;est un secteur où un site simple et bien pensé change vraiment le volume d&apos;appels — sans avoir besoin de grosses plateformes ni de jargon.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        <PricingSection />
+
+        {/* Contact */}
+        <section id="contact" className="relative section-radial-highlight border-t border-[var(--border)] bg-[var(--bg)] px-4 py-20 sm:px-6 lg:px-10 lg:py-32 overflow-x-hidden">
+          <div className="mx-auto max-w-6xl w-full min-w-0 relative z-10">
+            <p className="section-eyebrow">Contact</p>
+            <motion.h2
+              variants={scrollRevealInertia}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+              className="font-heading text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl lg:text-5xl section-title-industrial"
             >
               Contact
             </motion.h2>
+            <div className="brand-signature-line hidden lg:block mt-4" aria-hidden />
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -919,8 +1323,14 @@ export default function Home() {
               Aucun engagement. Aucun jargon. Juste un avis honnête.
             </p>
             <p className="mt-4 font-medium text-[var(--text)]">
-              Pas de contrat. Pas d&apos;abonnement forcé.
+              Pas de contrat. Option hébergement et maintenance 9&nbsp;€/mois si vous le souhaitez.
             </p>
+            <p className="mt-2 text-xs text-[var(--text-2)]">
+              Offres à partir de 150&nbsp;€ — Foundation, Performance ou Authority.
+            </p>
+            <Suspense fallback={null}>
+              <ContactFormPrefill setValue={setValue} />
+            </Suspense>
             <div className="mt-10 grid gap-12 lg:grid-cols-5">
               <div className="lg:col-span-3">
                 <form
@@ -944,7 +1354,7 @@ export default function Home() {
                     </div>
                     <div>
                       <label htmlFor="business" className="mb-1.5 block text-sm font-medium text-[var(--text-2)]">
-                        Nom de l’activité
+                        Nom de l&apos;activité
                       </label>
                       <input
                         id="business"
@@ -1050,41 +1460,62 @@ export default function Home() {
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-[var(--border)] px-4 py-12 sm:px-6 lg:px-10">
-          <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
-            <span className="font-heading text-sm font-medium text-[var(--text-2)]">
-              VIGI AGENCY · Garages & urgences · Hainaut
-            </span>
-            <div className="flex gap-6 text-sm text-[var(--text-2)]">
-              <a href="#contact" className="transition hover:text-[var(--accent)]">Contact</a>
-              <a href="#demo" className="transition hover:text-[var(--accent)]">Démonstrations</a>
+        <div className="mx-auto max-w-6xl w-full min-w-0 px-4 sm:px-6 lg:px-10">
+          <div className="footer-divider hidden lg:block" aria-hidden />
+        </div>
+        <footer className="px-4 py-12 sm:px-6 lg:py-14 lg:px-10">
+          <div className="mx-auto flex max-w-6xl w-full min-w-0 flex-col items-center justify-between gap-8 sm:flex-row">
+            <div className="text-center sm:text-left">
+              <p className="font-heading text-base font-semibold text-[var(--text)]">VIGI AGENCY</p>
+              <p className="mt-0.5 text-sm text-[var(--text-2)]">Garages & urgences</p>
+              <p className="text-xs text-[var(--text-2)]">Hainaut — Belgique</p>
             </div>
+            <nav className="flex flex-col items-center gap-3 sm:items-end sm:gap-4" aria-label="Footer">
+              <a href="#services" className="text-sm text-[var(--text-2)] transition duration-200 hover:text-[var(--accent)]">Services</a>
+              <a href="#demo" className="text-sm text-[var(--text-2)] transition duration-200 hover:text-[var(--accent)]">Démonstrations</a>
+              <a href="#offres" className="text-sm text-[var(--text-2)] transition duration-200 hover:text-[var(--accent)]">Offres</a>
+              <Link href="/expertise-garage" className="text-sm text-[var(--text-2)] transition duration-200 hover:text-[var(--accent)]">Expertise garages</Link>
+              <a href="#contact" className="text-sm text-[var(--text-2)] transition duration-200 hover:text-[var(--accent)]">Contact</a>
+            </nav>
           </div>
         </footer>
       </main>
 
-      {/* Mobile sticky bar */}
-      <div className="fixed inset-x-0 bottom-3 z-40 px-4 sm:px-6 lg:hidden">
-        <div className="mx-auto flex max-w-md items-center gap-2 rounded-2xl border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_90%,transparent)] px-3 py-2 shadow-[0_18px_60px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+      {/* Mobile sticky bar — safe area iOS + flex stable */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-40 overflow-x-hidden px-4 pt-3 lg:hidden"
+        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+      >
+        <div className="mx-auto flex max-w-md w-full min-w-0 flex-nowrap items-center gap-2 rounded-2xl border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_92%,transparent)] px-3 py-2.5 shadow-[0_18px_60px_rgba(0,0,0,0.9)] [backdrop-filter:blur(12px)] [-webkit-backdrop-filter:blur(12px)]">
           <motion.a
-            href="#contact"
+            href="https://wa.me/32468367226?text=Bonjour%2C%20je%20souhaite%20parler%20d%27un%20site%20web%20pour%20mon%20garage%20%2F%20service%20de%20depannage."
+            target="_blank"
+            rel="noopener noreferrer"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.96 }}
-            className="flex-1 rounded-xl bg-[var(--accent)] px-3 py-2 text-center text-xs font-semibold text-black outline-none transition hover:bg-[var(--accent-2)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
-            aria-label="Être rappelé par VIGI AGENCY"
+            className="min-w-0 flex-1 shrink rounded-xl bg-[var(--accent)] px-3 py-2.5 text-center text-xs font-semibold text-black outline-none transition hover:bg-[var(--accent-2)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
+            aria-label="Contacter VIGI AGENCY sur WhatsApp pour être rappelé"
           >
-            Être rappelé
+            <span className="block truncate whitespace-nowrap">Être rappelé</span>
           </motion.a>
           <motion.a
             href="https://wa.me/32468367226?text=Bonjour%2C%20je%20souhaite%20parler%20d%27un%20site%20web%20pour%20mon%20garage%20%2F%20service%20de%20depannage."
             whileTap={{ scale: 0.96 }}
-            className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-2.5 py-2 text-[11px] font-medium text-[var(--text)] outline-none transition hover:border-[var(--border)] hover:bg-[var(--surface-2)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
+            className="shrink-0 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2.5 text-xs font-medium text-[var(--text)] outline-none transition hover:border-[var(--border)] hover:bg-[var(--surface-2)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
             aria-label="Contacter VIGI AGENCY sur WhatsApp"
           >
-            WhatsApp
+            <span className="whitespace-nowrap">WhatsApp</span>
           </motion.a>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div className="site-main min-h-screen" />}>
+      <Home />
+    </Suspense>
   );
 }
