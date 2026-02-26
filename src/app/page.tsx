@@ -11,6 +11,7 @@ import { PricingSection } from "./components/sections/Pricing";
 import { ProofSection } from "./components/sections/Proof";
 import { ServicesSection } from "./components/sections/Services";
 import { CinematicVideoSection } from "./components/sections/CinematicVideo";
+import { InstagramSection } from "./components/sections/InstagramSection";
 
 const navLinks = [
   { href: "#services", label: "Services" },
@@ -112,6 +113,7 @@ function Home() {
         <PricingSection />
         <FaqSection />
         <ContactSection />
+        <InstagramSection />
 
         <div className="mx-auto max-w-6xl w-full min-w-0 px-4 sm:px-6 lg:px-10">
           <div className="footer-divider hidden lg:block" aria-hidden />
