@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { METIERS, ZONES, getCitiesOrderedByZone, getCityBySlug, getCityById } from "@/lib/local-landing-data";
@@ -11,31 +11,26 @@ function CreationSiteContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const [metier, setMetier] = useState<string>("garage");
-  const [zone, setZone] = useState<string>("hainaut");
-  const [ville, setVille] = useState<string>("Mons");
 
-  useEffect(() => {
-    const m = searchParams.get("metier") || "garage";
-    const z = searchParams.get("zone") || "hainaut";
-    const v = searchParams.get("ville");
-    const city = v ? getCityBySlug(v) : null;
-    setMetier(m);
-    setZone(z);
-    setVille(city?.id ?? "Mons");
-  }, [searchParams]);
+  const metier = searchParams.get("metier") || "garage";
+  const zone = searchParams.get("zone") || "hainaut";
+  const villeSlug = searchParams.get("ville");
+  const ville = (villeSlug ? getCityBySlug(villeSlug)?.id : null) ?? "Mons";
 
-  useEffect(() => {
-    const slug = getCityById(ville)?.slug ?? ville.toLowerCase();
+  const updateParams = (next: { metier?: string; zone?: string; ville?: string }) => {
+    const nextMetier = next.metier ?? metier;
+    const nextZone = next.zone ?? zone;
+    const nextVille = next.ville ?? ville;
+    const slug = getCityById(nextVille)?.slug ?? nextVille.toLowerCase();
     const params = new URLSearchParams();
-    params.set("metier", metier);
-    params.set("zone", zone);
+    params.set("metier", nextMetier);
+    params.set("zone", nextZone);
     params.set("ville", slug);
-    const next = `?${params.toString()}`;
-    if (typeof window !== "undefined" && window.location.search !== next) {
-      router.replace(`${pathname}${next}`, { scroll: false });
+    const nextSearch = `?${params.toString()}`;
+    if (typeof window !== "undefined" && window.location.search !== nextSearch) {
+      router.replace(`${pathname}${nextSearch}`, { scroll: false });
     }
-  }, [metier, zone, ville, pathname, router]);
+  };
 
   return (
     <div className="site-main min-h-screen">
@@ -71,7 +66,7 @@ function CreationSiteContent() {
                 <button
                   key={m.id}
                   type="button"
-                  onClick={() => setMetier(m.id)}
+                  onClick={() => updateParams({ metier: m.id })}
                   aria-pressed={metier === m.id}
                   className={cn(
                     "inline-flex items-center rounded-full border px-4 py-2.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-2)]",
@@ -95,7 +90,7 @@ function CreationSiteContent() {
                 <button
                   key={z.id}
                   type="button"
-                  onClick={() => setZone(z.id)}
+                  onClick={() => updateParams({ zone: z.id })}
                   aria-pressed={zone === z.id}
                   className={cn(
                     "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-2)]",
@@ -119,7 +114,7 @@ function CreationSiteContent() {
                 <button
                   key={c.id}
                   type="button"
-                  onClick={() => setVille(c.id)}
+                  onClick={() => updateParams({ ville: c.id })}
                   aria-pressed={ville === c.id}
                   className={cn(
                     "inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-2)]",

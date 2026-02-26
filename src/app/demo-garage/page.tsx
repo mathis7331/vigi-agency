@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Phone, Calendar, CheckCircle2 } from "lucide-react";
 import { DemoHeader } from "@/components/demo/DemoHeader";
@@ -82,13 +83,13 @@ export default function DemoGaragePage() {
                   <Phone className="h-4 w-4" />
                   Appeler maintenant
                 </a>
-                <a
+                <Link
                   href="/#contact?from=demo-garage"
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-5 py-3 text-sm font-semibold text-[var(--text)] transition hover:border-[var(--accent)] hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
                 >
                   <Calendar className="h-4 w-4" />
                   Demande de rendez-vous
-                </a>
+                </Link>
               </div>
 
               <div className="flex flex-wrap gap-2 text-xs text-[var(--text-2)]">

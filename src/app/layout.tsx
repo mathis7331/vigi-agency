@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { CanonicalTag } from "@/components/ui/CanonicalTag";
 import "./globals.css";
 
 const inter = Inter({
@@ -10,13 +12,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://vigidevis.be'),
+  metadataBase: new URL('https://www.vigi-agency.be'),
   title: {
-    default: 'VIGI AGENCY — Sites web pour garages & urgences',
+    default: 'VIGI AGENCY — Sites web qui génèrent des appels pour garages & artisans auto',
     template: '%s — VIGI AGENCY',
   },
   description:
-    'Sites web rapides pour garages, dépanneurs et carrossiers : appel 1 clic, WhatsApp, SEO local, déploiement en 72h.',
+    'Sites web premium pour garages, dépannage, carrosserie et detailing. Appel en 1 clic, WhatsApp intégré et SEO local. Déploiement rapide en Belgique.',
   keywords: [
     'site web garage',
     'site garage Mons',
@@ -40,11 +42,11 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'fr_BE',
-    url: 'https://vigidevis.be',
+    url: 'https://www.vigi-agency.be',
     siteName: 'VIGI AGENCY',
-    title: 'VIGI AGENCY — Sites web pour garages & urgences',
+    title: 'VIGI AGENCY — Sites web qui génèrent des appels pour garages & artisans auto',
     description:
-      'Sites web rapides pour garages, dépanneurs et carrossiers : appel 1 clic, WhatsApp, SEO local, déploiement en 72h.',
+      'Sites web premium pour garages, dépannage, carrosserie et detailing. Appel en 1 clic, WhatsApp intégré et SEO local. Déploiement rapide en Belgique.',
     images: [
       {
         url: '/og-image.png',
@@ -56,9 +58,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'VIGI AGENCY — Sites web pour garages & urgences',
+    title: 'VIGI AGENCY — Sites web qui génèrent des appels pour garages & artisans auto',
     description:
-      'Sites web rapides pour garages, dépanneurs et carrossiers : appel 1 clic, WhatsApp, SEO local, déploiement en 72h.',
+      'Sites web premium pour garages, dépannage, carrosserie et detailing. Appel en 1 clic, WhatsApp intégré et SEO local. Déploiement rapide en Belgique.',
     images: ['/og-image.png'],
   },
   icons: {
@@ -89,7 +91,9 @@ export default function RootLayout({
       className={inter.variable}
     >
       <body className="font-sans antialiased">
+        <CanonicalTag />
         {children}
+        <Analytics />
       </body>
     </html>
   );

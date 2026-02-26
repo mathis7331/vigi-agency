@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import {
   getMetierBySlug,
   getCityBySlug,
@@ -11,14 +12,23 @@ type Props = {
   params: Promise<{ metier: string; ville: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { metier: metierSlug, ville: villeSlug } = await params;
+function getValidatedLandingData(metierSlug: string, villeSlug: string) {
   const metier = getMetierBySlug(metierSlug);
   const city = getCityBySlug(villeSlug);
-  const metierLabel = metier?.label ?? metierSlug;
-  const cityLabel = city?.label ?? villeSlug;
-  const title = `Création site web ${metierLabel.toLowerCase()} à ${cityLabel}`;
-  const description = getMetaDescription(metierLabel, cityLabel);
+
+  if (!metier || !city) {
+    notFound();
+  }
+
+  return { metier, city };
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { metier: metierSlug, ville: villeSlug } = await params;
+  const { metier, city } = getValidatedLandingData(metierSlug, villeSlug);
+  const title = `Création site web ${metier.label.toLowerCase()} à ${city.label}`;
+  const description = getMetaDescription(metier.label, city.label);
+
   return {
     title,
     description: description.slice(0, 155),
@@ -27,11 +37,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CreationSiteMetierVillePage({ params }: Props) {
   const { metier: metierSlug, ville: villeSlug } = await params;
-  const metier = getMetierBySlug(metierSlug);
-  const city = getCityBySlug(villeSlug);
-  const metierId = metier?.id ?? "garage";
+  const { metier, city } = getValidatedLandingData(metierSlug, villeSlug);
   const zoneId = "belgique";
-  const villeId = city?.id ?? "Mons";
 
   return (
     <div className="site-main min-h-screen">
@@ -51,9 +58,9 @@ export default async function CreationSiteMetierVillePage({ params }: Props) {
 
       <main className="mx-auto max-w-4xl w-full min-w-0 px-4 py-10 sm:px-6 lg:px-10 lg:py-16 overflow-x-hidden">
         <LocalLandingPreviewClient
-          metierId={metierId}
+          metierId={metier.id}
           zoneId={zoneId}
-          villeId={villeId}
+          villeId={city.id}
           backHref="/"
           showPreviewLabel={false}
           compact={false}

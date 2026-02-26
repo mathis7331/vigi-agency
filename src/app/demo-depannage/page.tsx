@@ -142,7 +142,7 @@ export default function DemoDepannagePage() {
                   Dépannage auto rapide — 24h/7
                 </h1>
                 <p className="max-w-xl text-base leading-relaxed text-[var(--text-2)]">
-                  Besoin d'aide maintenant ? On vous répond directement.
+                  Besoin d&apos;aide maintenant ? On vous répond directement.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -202,7 +202,7 @@ export default function DemoDepannagePage() {
               {...sectionTitleMotion}
               className="text-2xl font-semibold tracking-tight text-[var(--text)] sm:text-3xl"
             >
-              Types d'intervention
+              Types d&apos;intervention
             </motion.h2>
             <div className="mt-6 grid gap-4 md:gap-5 md:grid-cols-3">
               {services.map((s, i) => (
@@ -449,3 +449,4 @@ function ProofSection() {
     </section>
   );
 }
+

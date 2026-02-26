@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Calendar,
@@ -142,13 +143,13 @@ export default function DemoDetailingPage() {
                   <ImageIcon className="h-4 w-4" />
                   Voir les résultats
                 </a>
-                <a
+                <Link
                   href="/#contact?from=demo-detailing"
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-5 py-3 text-sm font-semibold text-[var(--text)] transition hover:border-[var(--accent)] hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
                 >
                   <Calendar className="h-4 w-4" />
                   Réserver un créneau
-                </a>
+                </Link>
               </div>
               <div className="flex flex-wrap gap-2 text-xs text-[var(--text-2)]">
                 {trustBullets.map((bullet) => (
@@ -540,3 +541,5 @@ function BeforeAfterSlider() {
     </motion.div>
   );
 }
+
+

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Phone,
@@ -52,7 +53,7 @@ const trustBullets = [
 const services = [
   { title: "Réparation carrosserie", icon: Wrench, copy: "Chocs, redressement, remplacement de pièces." },
   { title: "Pare-brise & vitrage", icon: Wind, copy: "Réparation d'impact ou remplacement, gestion assurance." },
-  { title: "Débosselage", icon: Brush, copy: "Sans peinture quand c'est possible." },
+  { title: "Débosselage", icon: Brush, copy: "Sans peinture quand c&apos;est possible." },
   { title: "Peinture complète", icon: Brush, copy: "Finition soignée, couleur d'origine." },
   { title: "Rayures & impacts", icon: Scissors, copy: "Smart repair, corrections ciblées." },
   { title: "Préparation contrôle technique", icon: Gauge, copy: "Vérifications avant passage." },
@@ -62,7 +63,7 @@ const commentCaSePasse = [
   {
     step: "1",
     title: "Envoyez une photo",
-    copy: "Impact, rayure ou pare-brise : envoyez une ou deux photos. On vous dit si c'est réparable et à quel ordre de prix.",
+    copy: "Impact, rayure ou pare-brise : envoyez une ou deux photos. On vous dit si c&apos;est réparable et à quel ordre de prix.",
     icon: ImageIcon,
   },
   {
@@ -153,13 +154,13 @@ export default function DemoCarrosseriePage() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
-                <a
+                <Link
                   href="/#contact?from=demo-carrosserie"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-black shadow-[0_18px_50px_rgba(245,158,11,0.25)] transition hover:translate-y-[-1px] hover:shadow-[0_22px_60px_rgba(245,158,11,0.33)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
                 >
                   <FileText className="h-4 w-4" />
                   Demander un devis
-                </a>
+                </Link>
                 <a
                   href={`tel:${CARROSSERIE.phoneE164}`}
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-5 py-3 text-sm font-semibold text-[var(--text)] transition hover:border-[var(--accent)] hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
@@ -229,7 +230,7 @@ export default function DemoCarrosseriePage() {
               ))}
             </div>
             <p className="mt-5 text-sm text-[var(--text-2)]">
-              Vous ne savez pas si c'est réparable ? Appelez, on vous dit directement.
+              Vous ne savez pas si c&apos;est réparable ? Appelez, on vous dit directement.
             </p>
           </div>
         </section>
@@ -487,3 +488,5 @@ function BeforeAfterSection() {
     </section>
   );
 }
+
+
