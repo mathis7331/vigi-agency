@@ -12,7 +12,6 @@ export interface MetierConfig {
   slug: string;
   keywords: string[];
   benefits: string[];
-  demoLink: string | null;
   faq: { q: string; a: string }[];
 }
 
@@ -39,7 +38,6 @@ export const METIERS: MetierConfig[] = [
       "Mise en avant de vos horaires et de votre zone.",
       "Site rapide et lisible sur téléphone, adapté à la recherche locale.",
     ],
-    demoLink: "/demo-garage",
     faq: [
       {
         q: "Combien de temps pour mettre le site en ligne ?",
@@ -66,7 +64,6 @@ export const METIERS: MetierConfig[] = [
       "Zone d’intervention claire pour filtrer les appels hors zone.",
       "Site rapide sur mobile, adapté à la recherche de dépannage.",
     ],
-    demoLink: "/demo-depannage",
     faq: [
       {
         q: "Pourquoi un site plutôt qu’une simple page Facebook ?",
@@ -93,7 +90,6 @@ export const METIERS: MetierConfig[] = [
       "Appel et WhatsApp visibles pour ceux qui préfèrent vous joindre directement.",
       "Site rapide et lisible sur mobile, adapté aux recherches carrosserie et pare-brise.",
     ],
-    demoLink: "/demo-carrosserie",
     faq: [
       {
         q: "Peut-on intégrer un slider avant/après ?",
@@ -120,7 +116,6 @@ export const METIERS: MetierConfig[] = [
       "Mise en avant des prestations (protection céramique, polissage, etc.).",
       "Site rapide et soigné, adapté à une clientèle exigeante.",
     ],
-    demoLink: "/demo-detailing",
     faq: [
       {
         q: "Comment montrer mes réalisations ?",

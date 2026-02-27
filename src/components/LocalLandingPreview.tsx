@@ -134,16 +134,7 @@ export function LocalLandingPreview({
         </div>
       </section>
 
-      {metier.demoLink && (
-        <p className="mt-6 text-sm text-[var(--text-2)]">
-          <Link
-            href={metier.demoLink}
-            className="text-[var(--accent)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
-          >
-            Voir une démo {metier.label.toLowerCase()} →
-          </Link>
-        </p>
-      )}
+
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <Link

@@ -10,10 +10,6 @@ const STATIC_PAGES = [
   "/creation-site-garage-mons",
   "/creation-site-depannage-charleroi",
   "/creation-site-carrosserie-hainaut",
-  "/demo-garage",
-  "/demo-depannage",
-  "/demo-carrosserie",
-  "/demo-detailing",
 ] as const;
 
 function makeEntry(

@@ -11,70 +11,9 @@ import {
   SCROLL_VIEWPORT,
   STAGGER_DELAY,
 } from "@/lib/motion";
-import { ProjectProofSection } from "./ProjectProof";
+import { ProjectionSection } from "./ProjectionSection";
 
-const demos = [
-  {
-    id: "garage",
-    icon: Wrench,
-    title: "Garage",
-    tabLabel: "Garage",
-    bullets: [
-      "Fiche atelier claire pour rassurer dès l'arrivée",
-      "Services visibles immédiatement sur mobile",
-      "Bouton d'appel accessible en 1 tap",
-    ],
-    previewTag: "GARAGE",
-    previewTitle: "Pensé pour les garages qui veulent plus d'appels, pas plus de gestion.",
-    previewCopy: "Une page simple et efficace, comme votre façon de travailler.",
-    ctaLabel: "Voir la démo",
-  },
-  {
-    id: "depannage",
-    icon: Truck,
-    title: "Dépannage urgence",
-    tabLabel: "Dépannage urgence",
-    bullets: [
-      "Page urgence accessible 24/7",
-      "Appel direct et WhatsApp visibles en permanence",
-      "Zone d'intervention claire pour éviter les appels inutiles",
-    ],
-    previewTag: "DÉPANNAGE",
-    previewTitle: "Quand un client est en panne, il doit pouvoir vous appeler sans réfléchir.",
-    previewCopy: "Moins de questions, plus d'interventions.",
-    ctaLabel: "Voir la démo",
-  },
-  {
-    id: "carrosserie",
-    icon: Car,
-    title: "Carrosserie / Pare-brise",
-    tabLabel: "Carrosserie / Pare-brise",
-    bullets: [
-      "Avant / après pour montrer le travail réel",
-      "Demande de devis simple et rapide",
-      "Prise de rendez-vous sans échange inutile",
-    ],
-    previewTag: "CARROSSERIE",
-    previewTitle: "Ici, ce sont les résultats qui font la différence.",
-    previewCopy: "Le visuel rassure avant même le premier contact.",
-    ctaLabel: "Voir la démo",
-  },
-  {
-    id: "detailing",
-    icon: Droplets,
-    title: "Detailing / Lavage auto",
-    tabLabel: "Detailing / Lavage auto",
-    bullets: [
-      "Image premium orientée avant / après",
-      "Mise en valeur du détail et de la finition",
-      "Prise de rendez-vous fluide et rapide",
-    ],
-    previewTag: "DETAILING",
-    previewTitle: "Un métier visuel mérite une vitrine qui donne envie.",
-    previewCopy: "Une page pensée pour ceux qui veulent se démarquer.",
-    ctaLabel: "Ouvrir la démo",
-  },
-] as const;
+
 
 const processSteps = [
   {
@@ -118,18 +57,8 @@ const deroulementSteps = [
 
 
 export function ProofSection() {
-  const [activeDemo, setActiveDemo] = useState<(typeof demos)[number]["id"]>("garage");
   const reduced = useReducedMotion();
   const variants = reduced ? scrollRevealReducedVariants : scrollRevealVariants;
-
-  const activeDemoData = demos.find((d) => d.id === activeDemo) ?? demos[0];
-
-  const demoHref: Record<(typeof demos)[number]["id"], string> = {
-    garage: "/demo-garage",
-    depannage: "/demo-depannage",
-    carrosserie: "/demo-carrosserie",
-    detailing: "/demo-detailing",
-  };
 
   return (
     <>
@@ -152,53 +81,7 @@ export function ProofSection() {
         </div>
       </section>
 
-      <section id="demo" className="relative section-radial-highlight border-t border-[var(--border)] bg-[var(--bg-2)] px-4 py-20 sm:px-6 lg:px-10 lg:py-32 overflow-x-hidden">
-        <div className="mx-auto max-w-6xl w-full min-w-0 relative z-10">
-          <p className="section-eyebrow">Démos</p>
-          <motion.h2 variants={variants} initial="hidden" whileInView="visible" viewport={SCROLL_VIEWPORT} className="font-heading text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl lg:tracking-tight lg:text-5xl section-title-industrial">Démonstrations</motion.h2>
-          <motion.p initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={SCROLL_VIEWPORT} transition={{ duration: 0.35, delay: reduced ? 0 : 0.06 }} className="mt-3 text-sm text-[var(--text-2)] max-w-2xl">Chaque démo est adaptée à un métier précis. Le contenu, le rythme et les appels à l&apos;action changent selon votre activité.</motion.p>
-          <div className="brand-signature-line hidden lg:block mt-4" aria-hidden />
-
-          <div className="mt-8 lg:mt-10 w-full min-w-0">
-            <div className="w-full min-w-0">
-              <div className="inline-flex flex-wrap gap-1 rounded-full border border-[var(--border)] bg-[var(--surface-2)] p-1 text-xs max-w-full">
-                {demos.map((demo) => (
-                  <button key={demo.id} type="button" onClick={() => setActiveDemo(demo.id)} className={cn("flex items-center gap-1.5 rounded-full px-3 py-1.5 transition text-[11px] sm:text-xs", activeDemo === demo.id ? "bg-[var(--text)] text-[var(--bg)] shadow-sm" : "text-[var(--text-2)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]")} aria-label={`Voir la démo ${demo.title}`}>
-                    <demo.icon className="h-3.5 w-3.5" />
-                    <span>{demo.tabLabel}</span>
-                  </button>
-                ))}
-              </div>
-
-              <motion.a key={activeDemo} href={demoHref[activeDemo]} variants={variants} initial="hidden" whileInView="visible" viewport={SCROLL_VIEWPORT} transition={{ delay: reduced ? 0 : STAGGER_DELAY }} className={cn("group/card block mt-6 w-full min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 backdrop-blur-sm lg:mt-10 lg:p-10 lg:rounded-3xl demo-card-hover demo-card-product lg:section-depth-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] overflow-hidden", activeDemo === "depannage" && "demo-card-depannage")} aria-label={`${activeDemoData.ctaLabel} — ${activeDemoData.title}`}>
-                <div className="demo-card-sheen hidden lg:block" aria-hidden />
-                <div className="relative">
-                  <div className="flex items-center gap-2 lg:gap-3">
-                    <div className="demo-card-icon-wrap inline-flex rounded-lg bg-[var(--accent)]/10 p-2 text-[var(--accent)] lg:p-3 transition-shadow duration-300"><activeDemoData.icon className="h-4 w-4 lg:h-5 lg:w-5" /></div>
-                    <div>
-                      <h3 className="font-heading text-base sm:text-lg lg:text-xl font-semibold text-[var(--text)]">{activeDemoData.title}</h3>
-                      <p className="text-xs lg:text-sm text-[var(--text-2)] lg:mt-1">{activeDemoData.previewTitle}</p>
-                    </div>
-                  </div>
-
-                  <ul className="mt-4 lg:mt-6 space-y-1.5 lg:space-y-2 text-sm lg:text-base text-[var(--text)]">
-                    {activeDemoData.bullets.map((item) => (
-                      <li key={item} className="flex items-center gap-2"><span className="h-1.5 w-1.5 lg:h-2 lg:w-2 rounded-full bg-[var(--accent)]" /><span>{item}</span></li>
-                    ))}
-                  </ul>
-
-                  <p className="mt-4 lg:mt-6 text-sm lg:text-base text-[var(--text-2)] lg:hidden">{activeDemoData.previewCopy}</p>
-
-                  <div className="mt-5 lg:mt-7">
-                    <span className="inline-flex items-center gap-2 rounded-lg border border-[var(--accent)] bg-[var(--accent)]/10 px-4 py-2 text-sm lg:text-base font-medium text-[var(--accent)] transition group-hover/card:bg-[var(--accent)]/20">{activeDemoData.ctaLabel}<ChevronRight className="h-4 w-4" /></span>
-                    <p className="demo-microtext hidden lg:block">{activeDemoData.previewCopy}</p>
-                  </div>
-                </div>
-              </motion.a>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ProjectionSection />
 
       <section id="parlons-projet" className="border-t border-[var(--border)] bg-[var(--bg)] px-4 py-16 sm:px-6 sm:py-20 lg:px-10 lg:py-24 overflow-x-hidden" style={{ background: "linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 100%)" }}>
         <div className="mx-auto max-w-3xl w-full min-w-0 text-center">
@@ -211,7 +94,7 @@ export function ProofSection() {
         </div>
       </section>
 
-      <ProjectProofSection />
+
 
       <section id="methode" className="border-t border-[var(--border)] bg-[var(--bg-2)] px-4 py-20 sm:px-6 lg:px-10 lg:py-32 overflow-x-hidden">
         <div className="mx-auto max-w-6xl w-full min-w-0">

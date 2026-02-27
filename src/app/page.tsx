@@ -15,7 +15,7 @@ import { InstagramSection } from "./components/sections/InstagramSection";
 
 const navLinks = [
   { href: "#services", label: "Services" },
-  { href: "#demo", label: "Démonstrations" },
+  { href: "#projection", label: "Cas Client" },
   { href: "#methode", label: "Méthode" },
   { href: "#deroulement", label: "Déroulement" },
   { href: "#preuves", label: "Preuves" },
@@ -36,7 +36,7 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    const sectionIds = ["services", "pertes", "demo", "parlons-projet", "resultats", "methode", "deroulement", "preuves", "qui", "offres", "faq", "contact"];
+    const sectionIds = ["services", "pertes", "projection", "parlons-projet", "resultats", "methode", "deroulement", "preuves", "qui", "offres", "faq", "contact"];
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -127,7 +127,7 @@ function Home() {
             </div>
             <nav className="flex flex-col items-center gap-3 sm:items-end sm:gap-4" aria-label="Footer">
               <a href="#services" className="text-sm text-[var(--text-2)] transition duration-200 hover:text-[var(--accent)]">Services</a>
-              <a href="#demo" className="text-sm text-[var(--text-2)] transition duration-200 hover:text-[var(--accent)]">Démonstrations</a>
+              <a href="#projection" className="text-sm text-[var(--text-2)] transition duration-200 hover:text-[var(--accent)]">Cas Client</a>
               <a href="#offres" className="text-sm text-[var(--text-2)] transition duration-200 hover:text-[var(--accent)]">Offres</a>
               <a href="#faq" className="text-sm text-[var(--text-2)] transition duration-200 hover:text-[var(--accent)]">FAQ</a>
               <Link href="/expertise-garage" className="text-sm text-[var(--text-2)] transition duration-200 hover:text-[var(--accent)]">Expertise garages</Link>
