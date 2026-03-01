@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { CITIES, METIERS } from "@/lib/local-landing-data";
+import { PILLAR_PAGES } from "@/lib/pillar-pages-data";
 
 const BASE_URL = "https://www.vigi-agency.be";
 
@@ -41,5 +42,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     )
   );
 
-  return [...staticEntries, ...dynamicLocalEntries];
+  const pillarEntries = PILLAR_PAGES.map((p) =>
+    makeEntry(`/${p.slug}`, lastModified, 0.9, "weekly")
+  );
+
+  return [...staticEntries, ...pillarEntries, ...dynamicLocalEntries];
 }

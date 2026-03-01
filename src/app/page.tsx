@@ -14,6 +14,7 @@ import { ServicesSection } from "./components/sections/Services";
 import { TechStackSection } from "@/components/sections/TechStack";
 import { CinematicVideoSection } from "./components/sections/CinematicVideo";
 import { InstagramSection } from "./components/sections/InstagramSection";
+import { ExpertiseMetiersSection } from "./components/sections/ExpertiseMetiers";
 
 
 const navLinks = [
@@ -116,7 +117,7 @@ function Home() {
         <ProofSection />
         <TechStackSection />
         <PricingSection />
-
+        <ExpertiseMetiersSection />
         <FaqSection />
         <ContactSection />
         <InstagramSection />
