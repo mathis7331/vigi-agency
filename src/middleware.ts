@@ -12,7 +12,9 @@ export function middleware(request: NextRequest) {
     if (isVigiDevis || isNakedVigiAgency) {
         // We want to force https://www.vigi-agency.be
         const newUrl = new URL(url.pathname + url.search, 'https://www.vigi-agency.be');
-        return NextResponse.redirect(newUrl, 301);
+        const response = NextResponse.redirect(newUrl, 301);
+        response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+        return response;
     }
 
     return NextResponse.next();

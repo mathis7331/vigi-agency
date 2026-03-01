@@ -128,25 +128,15 @@ function IPhoneCallMockup() {
 
   return (
     <motion.div
-      className={cn("relative w-full mx-auto lg:ml-auto lg:mr-0", HERO_IPHONE_MAX_WIDTH)}
+      className={cn("relative w-full mx-auto lg:ml-auto lg:mr-0 lg:hover:-translate-y-2 lg:transition-transform lg:duration-700", HERO_IPHONE_MAX_WIDTH)}
       animate={
         prefersReducedMotion
           ? undefined
           : {
-              x: [0, -0.6, 0.6, -0.4, 0],
-              y: [0, 0.2, -0.2, 0],
-              transition: { duration: 0.6, repeat: Infinity, ease: "easeInOut" },
-            }
-      }
-      whileHover={
-        prefersReducedMotion
-          ? undefined
-          : {
-              rotateZ: [-0.4, 0.4, -0.2, 0.2, 0],
-              y: -8,
-              x: 0,
-              transition: { duration: 0.9, repeat: Infinity, ease: "easeInOut" },
-            }
+            x: [0, -0.6, 0.6, -0.4, 0],
+            y: [0, 0.2, -0.2, 0],
+            transition: { duration: 0.6, repeat: Infinity, ease: "easeInOut" },
+          }
       }
     >
       <div
@@ -224,7 +214,7 @@ export function Hero() {
               variants={containerVariants}
               initial="hidden"
               animate={introDone ? "visible" : "hidden"}
-              className="space-y-6 rounded-2xl border border-white/8 bg-[color-mix(in_srgb,var(--bg)_86%,transparent)] p-4 shadow-[0_20px_45px_rgba(0,0,0,0.45)] backdrop-blur-[2px] sm:space-y-7 sm:p-6 lg:space-y-10 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-0 hero-glass-panel"
+              className="space-y-6 rounded-2xl border border-white/8 bg-[color-mix(in_srgb,var(--bg)_86%,transparent)] p-4 shadow-none md:shadow-[0_20px_45px_rgba(0,0,0,0.45)] md:backdrop-blur-[2px] sm:space-y-7 sm:p-6 lg:space-y-10 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none hero-glass-panel"
             >
               <div className="space-y-4 sm:space-y-5">
                 <motion.h1
@@ -239,7 +229,7 @@ export function Hero() {
                   variants={itemVariants}
                   className="max-w-lg text-[15px] font-medium leading-relaxed text-[var(--text-2)] [text-wrap:balance] sm:text-base lg:max-w-[52ch] lg:text-[18px]"
                 >
-                  Garages, dépannage, carrosserie et detailing : acquisition locale, parcours mobile optimisé et messages qui convertissent. Plus d’appels qualifiés, de leads et de réservations.
+                  Des systèmes web conçus pour structurer votre présence locale et transformer la demande en activité réelle. Filtrage intelligent, parcours structuré et acquisition qualifiée pour garages, carrosseries et centres de detailing.
                 </motion.p>
               </div>
 
@@ -252,7 +242,7 @@ export function Hero() {
                   className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-5 text-sm font-semibold text-black shadow-[0_0_30px_rgba(245,165,36,0.28)] transition-all duration-300 hover:bg-[var(--accent-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] sm:h-11 sm:w-auto sm:rounded-lg"
                   aria-label="Parler d’un projet"
                 >
-                  Parler d’un projet
+                  Auditer mon acquisition locale
                   <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </motion.a>
 
@@ -274,23 +264,23 @@ export function Hero() {
               <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2.5 lg:hidden">
                 <div className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[11px] font-medium text-[var(--text-2)]">
                   <Zap className="h-3.5 w-3.5 text-[var(--accent)]" />
-                  <span className="truncate">Plus de leads qualifiés</span>
+                  <span className="truncate">Architecture technique</span>
                 </div>
                 <div className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[11px] font-medium text-[var(--text-2)]">
                   <Shield className="h-3.5 w-3.5 text-[var(--accent)]" />
-                  <span className="truncate">Positionnement haut de gamme</span>
+                  <span className="truncate">Présence dominante</span>
                 </div>
               </motion.div>
 
               <motion.div variants={itemVariants} className="hidden lg:flex hero-proof-chips">
                 <span className="hero-proof-chip">
                   <Zap className="h-3.5 w-3.5 text-[var(--accent)]" />
-                  Plus de leads qualifiés
+                  Architecture technique
                 </span>
                 <div className="hero-proof-separator" />
                 <span className="hero-proof-chip">
                   <Shield className="h-3.5 w-3.5 text-[var(--accent)]" />
-                  Positionnement haut de gamme
+                  Présence dominante
                 </span>
               </motion.div>
             </motion.div>

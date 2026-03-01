@@ -7,11 +7,14 @@ import { cn } from "@/lib/utils";
 import { ContactSection } from "./components/sections/Contact";
 import { FaqSection } from "./components/sections/Faq";
 import { HeroSection } from "./components/sections/Hero";
+import { ConceptSection } from "@/components/sections/Concept";
 import { PricingSection } from "./components/sections/Pricing";
 import { ProofSection } from "./components/sections/Proof";
 import { ServicesSection } from "./components/sections/Services";
+import { TechStackSection } from "@/components/sections/TechStack";
 import { CinematicVideoSection } from "./components/sections/CinematicVideo";
 import { InstagramSection } from "./components/sections/InstagramSection";
+
 
 const navLinks = [
   { href: "#services", label: "Services" },
@@ -108,9 +111,12 @@ function Home() {
       <main className="relative z-10 overflow-x-hidden overflow-y-visible pb-28 sm:pb-0">
         <HeroSection />
         <CinematicVideoSection />
+        <ConceptSection />
         <ServicesSection />
         <ProofSection />
+        <TechStackSection />
         <PricingSection />
+
         <FaqSection />
         <ContactSection />
         <InstagramSection />

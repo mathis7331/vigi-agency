@@ -19,10 +19,10 @@ const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 const ratelimit =
   redisUrl && redisToken
     ? new Ratelimit({
-        redis: new Redis({ url: redisUrl, token: redisToken }),
-        limiter: Ratelimit.fixedWindow(5, "10 m"),
-        analytics: true,
-      })
+      redis: new Redis({ url: redisUrl, token: redisToken }),
+      limiter: Ratelimit.fixedWindow(5, "10 m"),
+      analytics: true,
+    })
     : null;
 
 function escapeHtml(text: string): string {
@@ -35,12 +35,25 @@ function escapeHtml(text: string): string {
 }
 
 export async function POST(req: Request) {
+  const origin = req.headers.get("origin") || req.headers.get("referer") || "";
+  const allowedDomains = ["https://www.vigi-agency.be", "https://vigi-agency.be", "http://localhost:3000"];
+  const isAllowed = allowedDomains.some(domain => origin.startsWith(domain));
+
+  if (process.env.NODE_ENV === "production" && !isAllowed) {
+    return NextResponse.json({ error: "Forbidden origin." }, { status: 403 });
+  }
+
+  const contentLength = req.headers.get("content-length");
+  if (contentLength && parseInt(contentLength, 10) > 2048) {
+    return NextResponse.json({ error: "Payload too large." }, { status: 413 });
+  }
+
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.CONTACT_FROM_EMAIL;
   const toEmail = process.env.CONTACT_TO_EMAIL;
 
   if (!apiKey || !fromEmail || !toEmail || !ratelimit) {
-    console.error("Missing contact API configuration");
+    console.warn("Contact API configuration incomplete or Upstash missing.");
     return NextResponse.json({ error: "Server configuration error." }, { status: 500 });
   }
 
@@ -91,13 +104,13 @@ export async function POST(req: Request) {
     });
 
     if (error) {
-      console.error("Resend error:", error);
+      console.error("Resend delivery failed");
       return NextResponse.json({ error: "Failed to send email." }, { status: 502 });
     }
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Contact API error:", error);
+    console.error("Contact API execution failed.");
     return NextResponse.json({ error: "Internal server error." }, { status: 500 });
   }
 }

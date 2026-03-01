@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { scrollRevealVariants, scrollRevealReducedVariants, SCROLL_VIEWPORT, STAGGER_DELAY } from "@/lib/motion";
+import { scrollRevealVariants, scrollRevealReducedVariants, SCROLL_VIEWPORT, STAGGER_DELAY, getStaggerDelay } from "@/lib/motion";
 
 type PricingPackage = {
   id: string;
@@ -111,7 +111,7 @@ export function PricingSection() {
           transition={{ delay: reduced ? 0 : STAGGER_DELAY }}
           className="mt-3 text-sm leading-relaxed text-[var(--text-2)] max-w-2xl"
         >
-          Notre méthode éprouvée permet de livrer vite, proprement, avec un objectif clair\u00A0: plus d’appels, plus de leads utiles, plus de réservations.
+          Une infrastructure déployée rapidement et sans faille, avec un objectif clair&nbsp;: asseoir votre autorité locale et structurer l&apos;acquisition qualifiée.
         </motion.p>
 
         <div className="mt-12 grid gap-6 lg:grid-cols-3 lg:gap-8">
@@ -122,12 +122,12 @@ export function PricingSection() {
               initial="hidden"
               whileInView="visible"
               viewport={SCROLL_VIEWPORT}
-              transition={{ delay: reduced ? 0 : STAGGER_DELAY + i * STAGGER_DELAY }}
+              transition={{ delay: reduced ? 0 : STAGGER_DELAY + getStaggerDelay(i) }}
               className={cn(
-                "relative flex flex-col rounded-2xl border bg-[var(--surface)] p-6 backdrop-blur-sm transition-all duration-300",
+                "relative flex flex-col rounded-2xl border bg-[var(--surface)] p-6 md:backdrop-blur-sm transition-all duration-300 will-change-transform",
                 "lg:p-8",
                 pkg.highlighted
-                  ? "border-[var(--accent)] shadow-[0_0_0_1px_var(--accent),0_20px_50px_rgba(0,0,0,0.4)] ring-1 ring-[var(--accent)]/20"
+                  ? "border-[var(--accent)] lg:shadow-[0_0_0_1px_var(--accent),0_20px_50px_rgba(0,0,0,0.4)] shadow-none ring-1 ring-[var(--accent)]/20"
                   : "border-[var(--border)] hover:border-[var(--border)] hover:bg-[var(--surface-2)]"
               )}
             >

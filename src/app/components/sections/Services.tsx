@@ -8,38 +8,39 @@ import {
   scrollRevealReducedVariants,
   SCROLL_VIEWPORT,
   STAGGER_DELAY,
+  getStaggerDelay,
 } from "@/lib/motion";
 
 const whyCards = [
   {
     icon: Phone,
-    title: "Plus d'appels",
-    copy: "Bouton d'appel direct sur mobile. Vos clients vous contactent en un tap, sans friction.",
+    title: "Chemin de Contact Direct",
+    copy: "L’interface priorise l’action. Vos clients accèdent à vos services sans friction, via une ergonomie pensée pour le mobile.",
   },
   {
     icon: MessageCircle,
-    title: "Réponse plus rapide",
-    copy: "WhatsApp intégré avec message pré-rempli. Vos clients vous contactent directement, vous répondez quand vous pouvez.",
+    title: "Qualification des Demandes",
+    copy: "Intégration WhatsApp pré-structurée et formulaires. Vous recevez les informations essentielles avant même de répondre.",
   },
   {
     icon: MapPin,
-    title: "Visibilité locale sur Google Maps",
-    copy: "Optimisé pour « garage Mons », « dépannage Charleroi ». Vous apparaissez quand on vous cherche.",
+    title: "Empreinte Locale Dominante",
+    copy: "Architecture SEO optimisée pour sécuriser vos positions sur les requêtes clés de votre zone géographique.",
   },
   {
     icon: Zap,
-    title: "Site ultra rapide",
-    copy: "Pages qui chargent instantanément. Google vous privilégie, vos clients restent.",
+    title: "Vitesse d'Exécution Maximale",
+    copy: "Temps de chargement instantanés. Une performance technique qui retient l'utilisateur et satisfait les exigences de Google.",
   },
   {
     icon: Star,
-    title: "Preuves sociales",
-    copy: "Avis clients et photos de travaux. Vos prospects se rassurent avant d'appeler.",
+    title: "Preuve de Compétence",
+    copy: "Mise en valeur structurée de vos interventions, photos avant/après et avis clients pour asseoir votre légitimité.",
   },
   {
     icon: Shield,
-    title: "Toujours accessible",
-    copy: "Page de secours en cas de panne. Vos clients vous trouvent toujours, même en urgence.",
+    title: "Accessibilité Continue",
+    copy: "Disponibilité absolue de l'information. Vos futurs clients trouvent la bonne réponse, même en situation d'urgence.",
   },
 ];
 
@@ -63,7 +64,7 @@ export function ServicesSection() {
               viewport={SCROLL_VIEWPORT}
               className="font-heading text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl lg:tracking-tight section-title-industrial [transform:translateZ(0)]"
             >
-              Pourquoi ça marche
+              Notre Structure d&apos;Acquisition
             </motion.h2>
             <motion.p
               variants={variants}
@@ -73,7 +74,7 @@ export function ServicesSection() {
               transition={{ delay: reduced ? 0 : STAGGER_DELAY }}
               className="mt-4 text-sm leading-relaxed text-[var(--text-2)] lg:mt-6 lg:text-base lg:leading-relaxed max-w-2xl"
             >
-              6 leviers concrets pour transformer votre trafic en appels, sans usine à gaz ni tunnel compliqué.
+              6 piliers techniques pour transformer votre trafic local en demandes qualifiées.
             </motion.p>
             <div className="brand-signature-line hidden lg:block mt-4" aria-hidden />
           </div>
@@ -90,12 +91,12 @@ export function ServicesSection() {
                   initial="hidden"
                   whileInView="visible"
                   viewport={SCROLL_VIEWPORT}
-                  transition={{ delay: reduced ? 0 : Math.min(0.06 + i * STAGGER_DELAY, 0.2) }}
+                  transition={{ delay: reduced ? 0 : Math.min(0.06 + getStaggerDelay(i), 0.2) }}
                   whileHover={reduced ? undefined : { y: -4 }}
                   className={cn(
-                    "group relative flex gap-5 rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-5 backdrop-blur-sm transition-all duration-500 [transform:translateZ(0)]",
-                    "hover:border-[var(--accent)] hover:bg-[var(--surface-2)] hover:shadow-[0_24px_60px_rgba(11,18,32,0.9)]",
-                    "lg:flex-col lg:rounded-2xl lg:p-8 lg:card-premium lg:why-card-premium lg:section-depth-card"
+                    "group flex flex-col relative gap-5 rounded-[18px] border border-[var(--border)] bg-[var(--surface)] p-5 md:backdrop-blur-sm transition-all duration-500 [transform:translateZ(0)] will-change-transform",
+                    "hover:border-[var(--accent)] hover:bg-[var(--surface-2)] lg:hover:shadow-[0_24px_60px_rgba(11,18,32,0.9)]",
+                    "lg:rounded-2xl lg:p-8 lg:card-premium lg:why-card-premium lg:section-depth-card"
                   )}
                 >
                   <div className="why-card-corner-highlight hidden lg:block" aria-hidden />

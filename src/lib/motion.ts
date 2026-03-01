@@ -39,7 +39,13 @@ export const scrollRevealReducedVariants = {
 export const STAGGER_DELAY = 0.05;
 export const STAGGER_DELAY_MOBILE = 0.03;
 
+/** Utility to cap staggering limit to prevent mobile GPU pipeline stall */
+export function getStaggerDelay(index: number, maxCap: number = 2) {
+  return Math.min(index, maxCap) * STAGGER_DELAY;
+}
+
 export type ScrollRevealViewport = {
   once?: boolean;
   margin?: string;
+  amount?: number;
 };
